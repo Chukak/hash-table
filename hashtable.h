@@ -1,5 +1,5 @@
 /* 
-	Instead unsigned char, is used uint8_t in all the program.
+    Instead unsigned char, is used uint8_t in all the program.
 */
 
 #ifndef HASHTABLE_H
@@ -10,11 +10,11 @@
 
 
 /* 
-	hash table item struct.
-	key, val is pointers.
-	key point to value from table {'key' : 'value'}.
-	val is value by this key from table.
-	key and value must be string or char.
+    hash table item struct.
+    key, val is pointers.
+    key point to value from table {'key' : 'value'}.
+    val is value by this key from table.
+    key and value must be string or char.
 */
 typedef struct {
     uint8_t *key;
@@ -22,11 +22,11 @@ typedef struct {
 } hash_table_item;
 
 /* 
-	hash table struct.
-	size is size of table.
-	count is sum elements in table.
-	items if array of pointers, which point to has_table_items, which have value by key.
-	size and count must be unsigned int and more that 0.
+    hash table struct.
+    size is size of table.
+    count is sum elements in table.
+    items if array of pointers, which point to has_table_items, which have value by key.
+    size and count must be unsigned int and more that 0.
 */
 typedef struct {
     uint32_t size;
@@ -35,8 +35,8 @@ typedef struct {
 } hash_table;
 
 /* 
-	static variable DELETED_ITEM, for check all deleted items in table.
-	key and val must be null.
+    static variable DELETED_ITEM, for check all deleted items in table.
+    key and val must be null.
 */
 static hash_table_item DELETED_ITEM = {NULL, NULL};
 
