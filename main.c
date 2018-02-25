@@ -1,5 +1,5 @@
 /* 
-	Instead unsigned char, is used uint8_t in all the program.
+    Instead unsigned char, is used uint8_t in all the program.
 	See hashtable.h for more info about struct hash_table type. 
 */
 
