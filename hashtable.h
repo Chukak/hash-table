@@ -6,7 +6,6 @@
 #define HASHTABLE_H
 
 #include <stdint.h>
-#include <stddef.h>
 
 
 /* 
@@ -33,16 +32,6 @@ typedef struct {
     uint32_t count;
     hash_table_item **items;
 } hash_table;
-
-/* 
-    static variable DELETED_ITEM, for check all deleted items in table.
-    key and val must be null.
-*/
-static hash_table_item DELETED_ITEM = {NULL, NULL};
-
-// in hashtable.c use DELETED for check delete items.
-// is use for designation deleted items.
-#define DELETED DELETED_ITEM
 
 // functions from hastable.c
 hash_table *create_hash_table(size_t size);
