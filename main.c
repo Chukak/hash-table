@@ -1,5 +1,5 @@
 /* 
-    Instead unsigned char, is used uint8_t in all the program.
+    Instead unsigned char, is used char in all the program.
     See hashtable.h for more info about struct hash_table type. 
 */
 
@@ -32,7 +32,7 @@ void example() {
 	key is pointer.
 	table is struct hash_table type.
     */
-    uint8_t *d = get_value(table, "key2");
+    char *d = get_value(table, "key2");
     // print value by key2
     printf(" Key2: %s\n", d);
     d = get_value(table, "key1");

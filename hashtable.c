@@ -1,5 +1,5 @@
 /* 
-    Instead unsigned char, is used uint8_t in all the program.
+    Instead unsigned char, is used char in all the program.
     See hashtable.h for more info about struct hash_table, hash_table_item, DELETED type. 
 */
 #include <stdlib.h>
@@ -17,7 +17,7 @@
     strdup call malloc func, allocate memory for string, 
 	copy string in this place and return pointer to her
 */
-static hash_table_item *new_table_item(const uint8_t *key, const uint8_t *val) {
+static hash_table_item *new_table_item(const char *key, const char *val) {
     hash_table_item *item = malloc(sizeof(hash_table_item));
     item->key = strdup(key); 
     item->val = strdup(val);
@@ -37,7 +37,7 @@ static void delete_table_item(hash_table_item *item) {
     more info http://www.cse.yorku.ca/~oz/hash.html .
     return hash.
 */
-static uint32_t get_hash(const uint8_t *key) {
+static uint32_t get_hash(const char *key) {
     uint32_t hash = 5381;
     int32_t i;
     // set pointer to start of string, fix func
@@ -55,7 +55,7 @@ static uint32_t get_hash(const uint8_t *key) {
     more info https://en.wikipedia.org/wiki/Double_hashing .
     return hash.
 */
-static int32_t hash(const uint8_t *key, const int32_t num, const int32_t try) {
+static int32_t hash(const char *key, const int32_t num, const int32_t try) {
     int32_t hash_a = get_hash(key);
     int32_t hash_b = get_hash(key);
     // try = attempts, num = size array
@@ -86,7 +86,7 @@ hash_table *create_hash_table(size_t size){
     insert value by key into a table.
     nothing to return
 */
-void insert_item(hash_table *table, const uint8_t *key, const uint8_t*val) {
+void insert_item(hash_table *table, const char *key, const char*val) {
     hash_table_item *new_item, *current_item; 
     int32_t index, try;
     // get new hash_table_item, value by key 
@@ -130,7 +130,7 @@ void insert_item(hash_table *table, const uint8_t *key, const uint8_t*val) {
     return pointer to value by key.
 	
 */
-uint8_t *get_value(hash_table *table, const uint8_t *key) {
+char *get_value(hash_table *table, const char *key) {
     int32_t index, try;
     // number of attempts
     try = 1;
@@ -161,7 +161,7 @@ uint8_t *get_value(hash_table *table, const uint8_t *key) {
     nothing to return.
     removes value by key
 */
-void delete_item(hash_table *table, const uint8_t *key) {
+void delete_item(hash_table *table, const char *key) {
     int32_t index, try;
     // number of attempts
     try = 1;
