@@ -9,6 +9,12 @@
 #include "hashtable.h"
 
 /* 
+    static variable DELETED_ITEM, for check all deleted items in table.
+    key and val must be null.
+*/
+static hash_table_item DELETED = {NULL, NULL};
+
+/* 
     static function, create new hash_table_item.
     set value by key in table.
     return pointer to item // {'key' : 'value'} 
