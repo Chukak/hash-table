@@ -1,5 +1,4 @@
 /* 
-    Instead unsigned char, is used char in all the program.
     See hashtable.h for more info about struct hash_table type. 
 */
 
