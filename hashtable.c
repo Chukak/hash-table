@@ -43,11 +43,10 @@ static void delete_table_item(hash_table_item *item) {
 */
 static uint32_t get_hash(const char *key) {
     uint32_t hash = 5381;
-    int32_t i;
     // pointer to start of string
     key++;
-    while (i = *key) {
-	hash = ((hash << 5) + hash) + i;
+    while (*key) {
+        hash = ((hash << 5) + hash) + *key;
         key++;
     }
     return hash;
