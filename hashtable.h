@@ -1,7 +1,3 @@
-/* 
-    Instead unsigned char, is used char in all the program.
-*/
-
 #ifndef HASHTABLE_H
 #define HASHTABLE_H
 
@@ -11,7 +7,6 @@
 /* 
     hash table item struct.
     key, val is pointers.
-    key point to value from table {'key' : 'value'}.
     val is value by this key from table.
     key and value must be string or char.
 */
