@@ -25,6 +25,3 @@ hashtable: $(OBJ)
 clean: 
 	rm -rf hashtable *.o
 
-
-
-
