@@ -3,6 +3,7 @@
 */
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 #include <math.h>
 
 #include "hashtable.h"
@@ -25,7 +26,7 @@ static tb_hash_table_item DELETED = {NULL, NULL};
 static tb_hash_table_item *tb_new_table_item(const char *key, const void *val) {
     tb_hash_table_item *item = malloc(sizeof(tb_hash_table_item));
     item->key = strdup(key); 
-    item->val = (void *)val;
+    item->val = strdup((char *)val);
     return item;
 }
 
@@ -34,7 +35,9 @@ static tb_hash_table_item *tb_new_table_item(const char *key, const void *val) {
     nothing to returns.
  */
 static void tb_delete_table_item(tb_hash_table_item *item) {
-    free(item->key), free(item->val), free(item);
+    free(item->key);
+    free(item->val);
+    free(item);
 }
 
 /* 
@@ -98,7 +101,7 @@ void tb_insert_item(tb_hash_table *table, const char *key, const void *val) {
     // number of attemps
     try = 1;
     while (current_item) { 
-	// check if item is not deleted ( if item exists )
+        // check if item is not deleted ( if item exists )
 	if (current_item != &DELETED) {
             // if item exists, replace value by key
             if (strcmp(current_item->key, key) == 0) {
