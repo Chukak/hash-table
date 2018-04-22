@@ -10,65 +10,78 @@
 /* 
     Call this function for check work hash table.
 */
+
+typedef struct {
+    char *data;
+} Example;
+
+
 void example() {
-    // create table function, size table = 50.
-    // 
-    hash_table *table = create_hash_table(50);
-    /* 
-        insert_item(*table, *key, *val);
-	insert in table item {'key1' : 'val1'}. 
-	key = 'key1', value = 'val1'.
-	key, val is pointers. 
-	table is struct hash_table type, see in hastable.h.
-    */
-    insert_item(table, "key1", "val1");
-    insert_item(table, "key2", "val2");
-    /* 
-	get_value(*table, *key);
-	get value by key from table.
-	key is pointer.
-	table is struct hash_table type.
-    */
-    char *d = get_value(table, "key2");
-    // print value by key2
-    printf(" Key2: %s\n", d);
-    d = get_value(table, "key1");
-    // print value by key1
-    printf(" Key1: %s\n", d);
-    /* 
-	delete_item(*table, *key);
-	delete value by key from table.
-	key is pointer.
-	table is hash_table type.
-    */
-    delete_item(table, "key1");
-    /* 
-	after removal, this func return NULL type.
-        can check NULL - if (d) { more }.
-    */    
-    d = get_value(table, "key1");
-    // print Key1: (null)
-    printf(" Key1: %s\n", d);
-    /* 
-        if key is in the table, and value for this key changes, then. 
-	insert_item func, rewrite value by this key in table.
-	old value delete, new value available by key. 
-    */
-    insert_item(table, "key2", "val12");
-    d = get_value(table, "key2");
-    // print key2 new val: val12.
-    printf(" Key2 new val: %s\n", d);
-    // commented string
-    //!!!
-    //delete_hash_table(table);
-    //!!!
-    // this string will cause to segmentation fault error, after delete hash table.
-    // 
-    d = get_value(table, "key2");
-    printf(" Key2 l: %s\n", d);
-    /* 
-	delete hash table, all items, pointers and exempts memory.
-	this func call free() for table, items and pointers.
-    */
-    delete_hash_table(table);
-} 
+    tb_hash_table *table = tb_create_hash_table(6);
+    printf("%s", "Example of an empty table");
+    printf("\n");
+    if (table->empty) {
+        printf("%s", "table is empty");
+    }
+    printf("%s", "Example of the value `integer`");
+    printf("\n");
+    int a = 15;
+    tb_insert_item(table, "key1", &a);
+    int *a_value = tb_get_value(table, "key1");
+    printf("%i", *a_value);
+    printf("\n");
+    printf("%s", "Example of the value `char`");
+    printf("\n");
+    char c = 'A';
+    tb_insert_item(table, "key2", &c);
+    char *c_value = tb_get_value(table, "key2");
+    printf("%c", *c_value);
+    printf("\n");
+    printf("%s", "Example of the value `char *`");
+    printf("\n");
+    char *arr = "example";
+    tb_insert_item(table, "key3", &arr);
+    char **arr_value = tb_get_value(table, "key3");
+    printf("%s", *arr_value);
+    printf("\n");
+    printf("%s", "Example of the value `double`");
+    printf("\n");
+    double d = 1.5463;
+    tb_insert_item(table, "key4", &d);
+    double *d_value = tb_get_value(table, "key4");
+    printf("%f", *d_value);
+    printf("\n");
+    printf("%s", "Example of the value `float`");
+    printf("\n");
+    float f = 25.34;
+    tb_insert_item(table, "key5", &f);
+    float *f_value = tb_get_value(table, "key5");
+    printf("%f", *f_value);
+    printf("\n");
+    printf("%s", "Example of the value `random struct` ");
+    printf("\n");
+    Example struct_example = {"example data"};
+    tb_insert_item(table, "key6", &struct_example);
+    Example *struct_example_value = tb_get_value(table, "key6");
+    printf("struct data %s", struct_example_value->data);
+    printf("\n");
+    printf("pointer on example struct%p", struct_example_value);
+    printf("\n");
+    printf("%s", "Example of a non-empty table");
+    printf("\n");
+    if (!table->empty) {
+        printf("%s", "table isn`t empty");
+    }
+    printf("\n");
+    printf("%s", "Example an empty table");
+    printf("\n");
+    tb_delete_item(table, "key1");
+    tb_delete_item(table, "key2");
+    tb_delete_item(table, "key3");
+    tb_delete_item(table, "key4");
+    tb_delete_item(table, "key5");
+    tb_delete_item(table, "key6");
+    if (table->empty) {
+        printf("%s", "Table is empty");
+    }
+}
