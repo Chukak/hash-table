@@ -11,7 +11,7 @@
     static variable DELETED_ITEM, for check all deleted items in table.
     key and val must be null.
 */
-static hash_table_item DELETED = {NULL, NULL};
+static tb_hash_table_item DELETED = {NULL, NULL};
 
 /* 
     static function, creates a new hash_table_item.
@@ -22,10 +22,10 @@ static hash_table_item DELETED = {NULL, NULL};
     strdup call malloc func, allocates memory for string, 
 	copies string in this place and returns pointer to string.
 */
-static hash_table_item *new_table_item(const char *key, const char *val) {
-    hash_table_item *item = malloc(sizeof(hash_table_item));
+static tb_hash_table_item *tb_new_table_item(const char *key, const void *val) {
+    tb_hash_table_item *item = malloc(sizeof(tb_hash_table_item));
     item->key = strdup(key); 
-    item->val = strdup(val);
+    item->val = (void *)val;
     return item;
 }
 
@@ -33,7 +33,7 @@ static hash_table_item *new_table_item(const char *key, const char *val) {
     static function, removes hash_table_item from memory.
     nothing to returns.
  */
-static void delete_table_item(hash_table_item *item) {
+static void tb_delete_table_item(tb_hash_table_item *item) {
     free(item->key), free(item->val), free(item);
 }
 
@@ -71,13 +71,14 @@ static int32_t hash(const char *key, const int32_t num, const int32_t try) {
     function creates a new table in memory.
     returns pointer to table.
 */
-hash_table *create_hash_table(size_t size){
-    hash_table *table = malloc(sizeof(hash_table));
+tb_hash_table *tb_create_hash_table(size_t size){
+    tb_hash_table *table = malloc(sizeof(tb_hash_table));
     // size_t is unsigned int32 
     table->size = (uint32_t)size;
     table->count = 0;
     // returns pointer to allocated memory for all items
-    table->items = calloc(size, sizeof(hash_table_item));
+    table->items = calloc(size, sizeof(tb_hash_table_item));
+    table->empty = 1;
     return table;
 }
 
@@ -85,11 +86,11 @@ hash_table *create_hash_table(size_t size){
     function inserts value by key into table.
     nothing to returns
 */
-void insert_item(hash_table *table, const char *key, const char*val) {
-    hash_table_item *new_item, *current_item; 
+void tb_insert_item(tb_hash_table *table, const char *key, const void *val) {
+    tb_hash_table_item *new_item, *current_item; 
     int32_t index, try;
     // get new hash_table_item, value by key 
-    new_item = new_table_item(key, val);
+    new_item = tb_new_table_item(key, val);
     // get hash
     index = hash(new_item->key, table->size, 0);
     // get current item
@@ -102,7 +103,7 @@ void insert_item(hash_table *table, const char *key, const char*val) {
             // if item exists, replace value by key
             if (strcmp(current_item->key, key) == 0) {
                 // delete current value by key, set new value by key
-                delete_table_item(current_item);
+                tb_delete_table_item(current_item);
                 table->items[index] = new_item;
                 return;
             }
@@ -120,20 +121,21 @@ void insert_item(hash_table *table, const char *key, const char*val) {
     // set new item and count
     table->items[index] = new_item;
     table->count++;
+    table->empty = 0;
 }
 
 /* 
     function gets value by key.
     returns pointer to value.
 */
-char *get_value(hash_table *table, const char *key) {
+void *tb_get_value(tb_hash_table *table, const char *key) {
     int32_t index, try;
     // number of attempts
     try = 1;
     // get new hash
     index = hash(key, table->size, 0);
     // get item
-    hash_table_item *item = table->items[index];
+    tb_hash_table_item *item = table->items[index];
     while (item) {
 	// check if item is not deleted
 	if (item != &DELETED) {
@@ -156,18 +158,18 @@ char *get_value(hash_table *table, const char *key) {
     function removes value by key from table.
     nothing to returns.
 */
-void delete_item(hash_table *table, const char *key) {
+void tb_delete_item(tb_hash_table *table, const char *key) {
     int32_t index, try;
     // number of attempts
     try = 1;
     // get new hash
     index = hash(key, table->size, 0);
     // get item
-    hash_table_item *item = table->items[index];
+   tb_hash_table_item *item = table->items[index];
     while (item) {
         if (strcmp(item->key, key) == 0) {
             // remove item from memory
-            delete_table_item(item);
+            tb_delete_table_item(item);
             // set this item is deleted to table
             table->items[index] = &DELETED;
             // stop iteration
@@ -180,21 +182,24 @@ void delete_item(hash_table *table, const char *key) {
     }
     // set new count of items into table
     table->count--;
+    if (table->count == 0) {
+        table->empty = 1;
+    }
 }
 
 /* 
     function removes table from memory.
     nothing of return.
 */
-void delete_hash_table(hash_table *table) {
-    hash_table_item *item;
+void tb_delete_hash_table(tb_hash_table *table) {
+    tb_hash_table_item *item;
     // iteration over all items
     for (uint32_t index = 0; index < table->size; index++) {
 	item = table->items[index];
 	// check if item is not deleted or item is not NULL
         if (item && item != &DELETED) {
             // remove item from memory
-            delete_table_item(item);
+            tb_delete_table_item(item);
         }
     }
     // remove table from memory
