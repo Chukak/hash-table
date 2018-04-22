@@ -10,10 +10,10 @@
     val is value by this key from table.
     key and value must be string or char.
 */
-typedef struct {
+typedef struct hash_table_item {
     char *key;
-    char *val;
-} hash_table_item;
+    void *val;
+} tb_hash_table_item;
 
 /* 
     hash table struct.
@@ -25,15 +25,16 @@ typedef struct {
 typedef struct {
     uint32_t size;
     uint32_t count;
-    hash_table_item **items;
-} hash_table;
+    tb_hash_table_item **items;
+    int empty;
+} tb_hash_table;
 
 // functions from hastable.c
-hash_table *create_hash_table(size_t size);
-void insert_item(hash_table *table, const char *key, const char *val);
-char *get_value(hash_table *table, const char *key);
-void delete_item(hash_table *table, const char *key);
-void delete_hash_table(hash_table *table);
+tb_hash_table *tb_create_hash_table(size_t size);
+void tb_insert_item(tb_hash_table *table, const char *key, const void *val);
+void *tb_get_value(tb_hash_table *table, const char *key);
+void tb_delete_item(tb_hash_table *table, const char *key);
+void tb_delete_hash_table(tb_hash_table *table);
 
 
 #endif
