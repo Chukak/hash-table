@@ -84,4 +84,5 @@ void example() {
     if (table->empty) {
         printf("%s", "Table is empty");
     }
+    tb_delete_hash_table(table);
 }
