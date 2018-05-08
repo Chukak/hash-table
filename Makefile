@@ -1,7 +1,7 @@
 # compiler
-CC = gcc-7
+CC = gcc
 # flags
-CFLAGS = -g -Wall -D_BSD_SOURCE -std=c11 -Werror
+CFLAGS = -g -Wall -D_DEFAULT_SOURCE -std=c11 -Werror
 
 # name objects
 OBJ = main.o hashtable.o example.o
