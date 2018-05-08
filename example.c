@@ -30,6 +30,10 @@ void example() {
     int *a_value = tb_get_value(table, "key1");
     printf("%i", *a_value);
     printf("\n");
+    printf("With macros: ");
+    int a_value_macro = TB_I(tb_get_value(table, "key1"));
+    printf("%i", a_value_macro);
+    printf("\n");
     printf("%s", "Example of the value `char`");
     printf("\n");
     char c = 'A';
@@ -43,6 +47,10 @@ void example() {
     tb_insert_item(table, "key3", &arr);
     char **arr_value = tb_get_value(table, "key3");
     printf("%s", *arr_value);
+    printf("\n");
+    printf("With macros: ");
+    char *arr_value_macro = TB_STR(tb_get_value(table, "key3"));
+    printf("%s", arr_value_macro);
     printf("\n");
     printf("%s", "Example of the value `double`");
     printf("\n");
@@ -65,7 +73,11 @@ void example() {
     Example *struct_example_value = tb_get_value(table, "key6");
     printf("struct data %s", struct_example_value->data);
     printf("\n");
-    printf("pointer on example struct%p", struct_example_value);
+    Example struct_example_value1 = TB_CUSTOM_TYPE(Example, tb_get_value(table, "key6"));
+    printf("With macro: ");
+    printf("struct data %s", struct_example_value1.data);
+    printf("\n");
+    printf("pointer on example struct %p", struct_example_value);
     printf("\n");
     printf("%s", "Example of a non-empty table");
     printf("\n");
