@@ -25,7 +25,8 @@ static tb_hash_table_item DELETED = {NULL, NULL};
 static tb_hash_table_item *tb_new_table_item(const char *key, const void *val) {
     tb_hash_table_item *item = malloc(sizeof(tb_hash_table_item));
     item->key = strdup(key); 
-    item->val = strdup((char *)val);
+    item->val = malloc(sizeof(void *));
+    memcpy(item->val, val, sizeof(void *));
     return item;
 }
 
