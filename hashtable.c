@@ -46,8 +46,6 @@ static void tb_delete_table_item(tb_hash_table_item *item) {
 */
 static uint32_t get_hash(const char *key) {
     uint32_t hash = 5381;
-    // pointer to start of string
-    key++;
     while (*key) {
         hash = ((hash << 5) + hash) + *key;
         key++;
@@ -60,14 +58,14 @@ static uint32_t get_hash(const char *key) {
     more information https://en.wikipedia.org/wiki/Double_hashing .
     returns hash.
 */
-static int32_t hash(const char *key, const int32_t num, const int32_t try) {
-    int32_t hash_a = get_hash(key);
-    int32_t hash_b = get_hash(key);
+static uint32_t hash(const char *key, const int32_t num, const int32_t try) {
+    uint32_t hash_a = get_hash(key);
+    uint32_t hash_b = get_hash(key);
     // variables: try is attempts, num is array size
     // formula: hash_a(key) + try * hash_b(key) mod size
     // if hash_b == 0 then 1. This guarantees that hash_b never be zero 
     // if hash_b > 0 then hash_b 
-    return (hash_a + try * (hash_b == 0 ? 1 : hash_b)) % num;
+    return (hash_a + try * (hash_b == 0 ? 1 : hash_b)) % (num + 1);
 }
 
 /* 
@@ -91,7 +89,7 @@ tb_hash_table *tb_create_hash_table(size_t size){
 */
 void tb_insert_item(tb_hash_table *table, const char *key, const void *val) {
     tb_hash_table_item *new_item, *current_item; 
-    int32_t index, try;
+    uint32_t index, try;
     // get new hash_table_item, value by key 
     new_item = tb_new_table_item(key, val);
     // get hash
@@ -100,7 +98,7 @@ void tb_insert_item(tb_hash_table *table, const char *key, const void *val) {
     current_item = table->items[index];
     // number of attemps
     try = 1;
-    while (current_item) { 
+    while (current_item != NULL) { 
         // check if item is not deleted ( if item exists )
 	if (current_item != &DELETED) {
             // if item exists, replace value by key
@@ -109,12 +107,12 @@ void tb_insert_item(tb_hash_table *table, const char *key, const void *val) {
                 tb_delete_table_item(current_item);
                 table->items[index] = new_item;
                 return;
-            }
+            } 
         // if item is deleted, stop cycle     
         } else {
             break;
         }
-	// get new hash
+        // get new hash
         index = hash(new_item->key, table->size, try);
 	// get new current item
         current_item = table->items[index];
@@ -132,15 +130,15 @@ void tb_insert_item(tb_hash_table *table, const char *key, const void *val) {
     returns pointer to value.
 */
 void *tb_get_value(tb_hash_table *table, const char *key) {
-    int32_t index, try;
+    uint32_t index, try;
     // number of attempts
     try = 1;
     // get new hash
     index = hash(key, table->size, 0);
     // get item
     tb_hash_table_item *item = table->items[index];
-    while (item) {
-	// check if item is not deleted
+    while (item != NULL) {
+        // check if item is not deleted
 	if (item != &DELETED) {
             // check key and item.key 
             if (strcmp(item->key, key) == 0) {
@@ -162,7 +160,7 @@ void *tb_get_value(tb_hash_table *table, const char *key) {
     nothing to returns.
 */
 void tb_delete_item(tb_hash_table *table, const char *key) {
-    int32_t index, try;
+    uint32_t index, try;
     // number of attempts
     try = 1;
     // get new hash
