@@ -9,6 +9,10 @@ Run make
 ```bash
 make -f Makefile
 ```
+If you need the `.so` library:
+```bash
+make -f Library
+```
 
 ## How to use
 ### Create table
@@ -29,7 +33,7 @@ tb_insert_item(table, "key2", &string);
 ```
 
 ### Change value
-Call `tb_insert_item` function with the name of the key, if you want to chande the value by key.
+Call `tb_insert_item` function with the name of the key, if you want to change the value by key.
 ```c
 int *int_value = tb_get_value(table, "key1");
 printf("%i", *int_value); // print 1
@@ -64,7 +68,67 @@ To delete table call `tb_delete_hash_table` function. Pass the table as first pa
 ```c
 tb_delete_hash_table(table);
 ```
-### Macros
+
+## Python
+### How to compile
+This library can be compiled as a python module. For example, in Linux:
+```bash
+cd python
+python setup.py built_ext --inplace
+```
+In python:
+```python
+from hashtable import Table
+```
+
+### How to use
+#### Create table
+Create a table with a static size. Create the `Table` class. Pass the size as first parameter.
+```python
+table = Table(size);
+```
+
+#### Insert items
+Call the `insert` method from the `Table` class. Pass the name of the key as first parameter, the value as second. 
+```python
+table.insert("key1", 45)
+```
+
+#### Change value
+Call `get` method from the `Table` class with the name of the key, if you want to change the value by key.
+```python
+table.insert("key2", 45)
+print(table.get("key2")) # 45
+table.insert("key2", 64)
+print(table.get("key2")) #64
+```
+#### Get value by key
+To get the value call `get` method fron the `Table` class with table and key. Returns the value.
+Pass the name of the key as first.
+
+```python
+a = table.get("key2")
+print(a) 
+print(table.get("key2")) #a
+```
+
+#### Delete items
+To delete value by key call `delete` method from the `Table` class. Returns `True` if the deletion is successful otherwise `False`. Pass the name of the key as first.
+```python
+result = table.delete("key1");
+print(result) #True
+a = table.get("key1")
+print(a) # None
+```
+
+#### Delete table
+To delete table call `del`. 
+```python
+del table
+```
+
+
+### Macros (Only C/C++)
 You can be use macros to get value from `void *`. For example:
 ```c
 int a = TB_I(tb_get_value(table, "key"));
@@ -84,4 +148,5 @@ Type t;
 tb_insert_item(table, "key", &t);
 Type t = TB_CUSTOM_TYPE(tb_get_value(table, "key"));
 ```
+
 
