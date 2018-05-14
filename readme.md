@@ -11,7 +11,7 @@ make -f Makefile
 ```
 If you need the `.so` library:
 ```bash
-make -f Library
+make -f LibraryMakefile
 ```
 
 ## How to use
