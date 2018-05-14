@@ -70,7 +70,7 @@ static uint32_t hash(const char *key, const uint32_t num, const int32_t try) {
     // formula: hash_a(key) + try * hash_b(key) mod size
     // if hash_b == 0 then 1. This guarantees that hash_b never be zero 
     // if hash_b > 0 then hash_b 
-    return (hash_a + try * (hash_b == 0 ? 1 : hash_b)) % (num);
+    return (hash_a + try * (hash_b == 0 ? 1 : hash_b)) % (num + 1);
 }
 
 /* 
@@ -107,9 +107,6 @@ void tb_insert_item(tb_hash_table *table, const char *key, const void *val) {
     // number of attemps
     try = 1;
     while (current_item != NULL) {
-        if (try > table->size) {
-            SEG;
-        }
         // check if item is not deleted ( if item is exists )
 	if (current_item != &DELETED) {
             // if item exists, replace value by key
@@ -118,6 +115,9 @@ void tb_insert_item(tb_hash_table *table, const char *key, const void *val) {
                 tb_delete_table_item(current_item);
                 table->items[index] = new_item;
                 return;
+            }
+            if (table->size == table->count) {
+                SEG;
             }
         // if item is deleted, stop cycle     
         } else {
@@ -149,9 +149,6 @@ void *tb_get_value(tb_hash_table *table, const char *key) {
     // get item
     tb_hash_table_item *item = table->items[index];
     while (item != NULL) {
-        if (try > table->size) {
-            SEG;
-        }
         // check if item is not deleted
 	if (item != &DELETED) {
             // check key and item.key 
@@ -173,7 +170,11 @@ void *tb_get_value(tb_hash_table *table, const char *key) {
     function removes value by key from table.
     nothing to returns.
 */
-void tb_delete_item(tb_hash_table *table, const char *key) {
+int tb_delete_item(tb_hash_table *table, const char *key) {
+    if (!table->count) {
+            SEG;
+    }
+    //printf("%s\n", key);
     uint32_t index, try;
     // number of attempts
     try = 1;
@@ -182,17 +183,19 @@ void tb_delete_item(tb_hash_table *table, const char *key) {
     // get item
     tb_hash_table_item *item = table->items[index];
     while (item != NULL) {
-        if (try > table->size) {
-            SEG;
-        }
         if (item != &DELETED) {
             if (strcmp(item->key, key) == 0) {
                 // remove item from memory
                 tb_delete_table_item(item);
                 // set this item is deleted to table
                 table->items[index] = &DELETED;
+                // set new count of items into table
+                table->count--;
+                if (table->count == 0) {
+                    table->empty = 1;
+                }
                 // stop iteration
-                break;
+                return 1;
             }  
         }
 	// get new item, +1 attempts
@@ -200,11 +203,11 @@ void tb_delete_item(tb_hash_table *table, const char *key) {
 	item = table->items[index];
         try++;
     }
-    // set new count of items into table
-    table->count--;
     if (table->count == 0) {
-        table->empty = 1;
+        // raises if the key isn`t in the table
+        SEG; 
     }
+    return 0;
 }
 
 /* 
