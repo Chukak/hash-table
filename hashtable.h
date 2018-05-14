@@ -59,7 +59,7 @@
     key must be string.
     value must be poiter to object. 
 */
-typedef struct hash_table_item {
+typedef struct {
     char *key;
     void *val;
 } tb_hash_table_item;
