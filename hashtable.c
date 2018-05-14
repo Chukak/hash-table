@@ -4,8 +4,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <signal.h>
 
 #include "hashtable.h"
+
+
+// Raises segmentation fault.
+#define SEG raise(SIGSEGV)
 
 /* 
     static variable DELETED_ITEM, for check all deleted items in table.
@@ -58,14 +63,14 @@ static uint32_t get_hash(const char *key) {
     more information https://en.wikipedia.org/wiki/Double_hashing .
     returns hash.
 */
-static uint32_t hash(const char *key, const int32_t num, const int32_t try) {
+static uint32_t hash(const char *key, const uint32_t num, const int32_t try) {
     uint32_t hash_a = get_hash(key);
     uint32_t hash_b = get_hash(key);
     // variables: try is attempts, num is array size
     // formula: hash_a(key) + try * hash_b(key) mod size
     // if hash_b == 0 then 1. This guarantees that hash_b never be zero 
     // if hash_b > 0 then hash_b 
-    return (hash_a + try * (hash_b == 0 ? 1 : hash_b)) % (num + 1);
+    return (hash_a + try * (hash_b == 0 ? 1 : hash_b)) % (num);
 }
 
 /* 
@@ -81,8 +86,7 @@ tb_hash_table *tb_create_hash_table(size_t size){
     table->size = (uint32_t)size;
     table->count = 0;
     // returns pointer to allocated memory for all items
-    // ??? calloc(0, ...) - return 1 pointer.
-    table->items = calloc(size -1, sizeof(tb_hash_table_item));
+    table->items = calloc(size, sizeof(tb_hash_table_item));
     table->empty = 1;
     return table;
 }
@@ -102,8 +106,11 @@ void tb_insert_item(tb_hash_table *table, const char *key, const void *val) {
     current_item = table->items[index];
     // number of attemps
     try = 1;
-    while (current_item != NULL) { 
-        // check if item is not deleted ( if item exists )
+    while (current_item != NULL) {
+        if (try > table->size) {
+            SEG;
+        }
+        // check if item is not deleted ( if item is exists )
 	if (current_item != &DELETED) {
             // if item exists, replace value by key
             if (strcmp(current_item->key, key) == 0) {
@@ -111,7 +118,7 @@ void tb_insert_item(tb_hash_table *table, const char *key, const void *val) {
                 tb_delete_table_item(current_item);
                 table->items[index] = new_item;
                 return;
-            } 
+            }
         // if item is deleted, stop cycle     
         } else {
             break;
@@ -134,7 +141,7 @@ void tb_insert_item(tb_hash_table *table, const char *key, const void *val) {
     returns pointer to value.
 */
 void *tb_get_value(tb_hash_table *table, const char *key) {
-    uint32_t index, try;
+    uint32_t index, try; 
     // number of attempts
     try = 1;
     // get new hash
@@ -142,6 +149,9 @@ void *tb_get_value(tb_hash_table *table, const char *key) {
     // get item
     tb_hash_table_item *item = table->items[index];
     while (item != NULL) {
+        if (try > table->size) {
+            SEG;
+        }
         // check if item is not deleted
 	if (item != &DELETED) {
             // check key and item.key 
@@ -170,19 +180,24 @@ void tb_delete_item(tb_hash_table *table, const char *key) {
     // get new hash
     index = hash(key, table->size, 0);
     // get item
-   tb_hash_table_item *item = table->items[index];
-    while (item) {
-        if (strcmp(item->key, key) == 0) {
-            // remove item from memory
-            tb_delete_table_item(item);
-            // set this item is deleted to table
-            table->items[index] = &DELETED;
-            // stop iteration
-            break;
+    tb_hash_table_item *item = table->items[index];
+    while (item != NULL) {
+        if (try > table->size) {
+            SEG;
+        }
+        if (item != &DELETED) {
+            if (strcmp(item->key, key) == 0) {
+                // remove item from memory
+                tb_delete_table_item(item);
+                // set this item is deleted to table
+                table->items[index] = &DELETED;
+                // stop iteration
+                break;
+            }  
         }
 	// get new item, +1 attempts
         index = hash(key, table->size, try);
-		item = table->items[index];
+	item = table->items[index];
         try++;
     }
     // set new count of items into table
