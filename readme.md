@@ -89,9 +89,10 @@ table = Table(size);
 ```
 
 #### Insert items
-Call the `insert` method from the `Table` class. Pass the name of the key as first parameter, the value as second. 
+Call the `insert` method from the `Table` class. Returns `True` if the deletion is successful otherwise `False`. Pass the name of the key as first parameter, the value as second. 
 ```python
-table.insert("key1", 45)
+result = table.insert("key1", 45)
+print(result) #True
 ```
 
 #### Change value
