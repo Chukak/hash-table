@@ -1,32 +1,28 @@
-#### Определения компиляторов и средств, используемые совместно всеми целями сборки #####
+
 CC = gcc
 BASICOPTS = -g
 CFLAGS = -Werror -Wall -g -std=c11 -D_DEFAULT_SOURCE
 
 
-# Определите целевые каталоги.
 TARGETDIR_hashtable.so=GNU-amd64-Linux
 
 
 all: $(TARGETDIR_hashtable.so)/hashtable.so 
 
-## Цель: hashtable.c
 CFLAGS_hashtable.so = 
 OBJS_hashtable.so =  \
 	$(TARGETDIR_hashtable.so)/hashtable.o
 
 
-# Ссылка или архив
+
 SHAREDLIB_FLAGS_hashtable.so = -shared 
 $(TARGETDIR_hashtable.so)/hashtable.so: $(TARGETDIR_hashtable.so) $(OBJS_hashtable.so) 
 	$(CC) $(CFLAGS) $(CFLAGS_hashtable.so) -o $@ $(OBJS_hashtable.so) $(SHAREDLIB_FLAGS_hashtable.so)
 
 
-# Скомпилировать исходные файлы .o
 $(TARGETDIR_hashtable.so)/hashtable.o: $(TARGETDIR_hashtable.so) hashtable.c
 	$(CC) $(CFLAGS) -c $(CFLAGS_hashtable.so) $(CPPFLAGS_hashtable.so) -o $@ hashtable.c
 
-#### При выполнении команды "Очистить цель" будут удалены все созданные файлы ####
 clean:
 	rm -f \
 		$(TARGETDIR_hashtable.so)/hashtable.so \
@@ -34,13 +30,10 @@ clean:
 	rm -f -r $(TARGETDIR_hashtable.so)
 
 
-# Создать целевой каталог (при необходимости)
+
 $(TARGETDIR_hashtable.c):
 	mkdir -p $(TARGETDIR_hashtable.so)
 
-
-
-# Включить проверку зависимостей
 .KEEP_STATE:
 .KEEP_STATE_FILE:.make.state.GNU-amd64-Linux
 
