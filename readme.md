@@ -128,6 +128,8 @@ To delete table call `del`.
 del table
 ```
 
+#### Tests
+For testing check this [page](https://github.com/Chukak/hash-table/blob/master/python/readme.md).
 
 ### Macros (Only C/C++)
 You can be use macros to get value from `void *`. For example:
