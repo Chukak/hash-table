@@ -83,7 +83,7 @@ typedef struct {
 tb_hash_table *tb_create_hash_table(size_t size);
 void tb_insert_item(tb_hash_table *table, const char *key, const void *val);
 void *tb_get_value(tb_hash_table *table, const char *key);
-void tb_delete_item(tb_hash_table *table, const char *key);
+int tb_delete_item(tb_hash_table *table, const char *key);
 void tb_delete_hash_table(tb_hash_table *table);
 
 
