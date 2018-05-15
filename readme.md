@@ -16,7 +16,7 @@ make -f LibraryMakefile
 
 ## How to use
 ### Create table
-Create a table with a static size. Call `tb_create_hash_table` function. Pass the size as first parameter.
+Create a table with a static size. Call `tb_create_hash_table` function. Pass the size as the first parameter.
 ```c
 tb_hash_table *table = tb_create_hash_table(size);
 ```
@@ -24,12 +24,13 @@ tb_hash_table *table = tb_create_hash_table(size);
 ### Insert items
 Create the variable, that you want to pass to the table. 
 Call `tb_insert_item` function with table, key and value. 
-Pass the table as first parameter, the name of the key as second, and the address on your variable as third.
+Pass the table as the first parameter, the name of the key as the second, and the address on your variable as the third.
+Returns the position of the item. 
 ```c
 int a = 1;
-tb_insert_item(table, "key1", &a);
+long int pos = tb_insert_item(table, "key1", &a);
 char *string = "example";
-tb_insert_item(table, "key2", &string);
+long int pos = tb_insert_item(table, "key2", &string);
 ```
 
 ### Change value
@@ -44,7 +45,7 @@ printf("%i", *int_other_value); // print 2
 ```
 ### Get value by key
 To get the value call `tb_get_value` function with table and key. Funciton returns apointer to a value.
-Pass the table as first parameter and the name of the key as second.
+Pass the table as the first parameter and the name of the key as the second.
 
 ```c
 int *int_value = tb_get_value(table, "key1");
@@ -56,17 +57,31 @@ printf("%i", *string_value); // print example
 
 ### Delete items
 To delete value by key call `tb_delete_item` funtion. 
-Pass the table as first parameter and the name of the key as second.
+Pass the table as the first parameter and the name of the key as the second.
+Returns 1 if the item is deleted, otherwise returns 0.
 ```c
-tb_delete_item(table, "key1");
+int check = tb_delete_item(table, "key1");
 // segmentation fault error
 int *int_value = tb_get_value(table, "key1");
 ```
 
 ### Delete table
-To delete table call `tb_delete_hash_table` function. Pass the table as first parameter.
+To delete table call `tb_delete_hash_table` function. Pass the table as the first parameter.
 ```c
 tb_delete_hash_table(table);
+```
+
+### Get an item 
+To get the item call `tb_get_item` function. Pass the table as the first parameter, the key as the second.
+```c
+tb_hash_table_item *item = tb_get_item(table, "key");
+printf("%s", item->key);
+```
+
+### Get an item from the position
+To get the item from the position call `tb_item_at` function. Pass the table as the first parameter, the position as the second.
+```c
+tb_hash_table_item *item = tb_item_at(table, 1);
 ```
 
 ## Python
@@ -83,20 +98,21 @@ from hashtable import Table
 
 ### How to use
 #### Create table
-Create a table with a static size. Create the `Table` class. Pass the size as first parameter.
+Create a table with a static size. Create the `Table` class. Pass the size as the first parameter.
 ```python
 table = Table(size);
 ```
 
 #### Insert items
-Call the `insert` method from the `Table` class. Returns `True` if the deletion is successful otherwise `False`. Pass the name of the key as first parameter, the value as second. 
+Call the `insert` method from the `Table` class. Returns `True` if the deletion is successful otherwise `False`. Pass the name of the key as the first parameter, the value as the second. 
 ```python
 result = table.insert("key1", 45)
 print(result) #True
 ```
 
 #### Change value
-Call `get` method from the `Table` class with the name of the key, if you want to change the value by key.
+Call `insert` method from the `Table` class with the name of the key, if you want to change the value by key.
+Pass the name of the key as the first parameter, the value as the second. 
 ```python
 table.insert("key2", 45)
 print(table.get("key2")) # 45
@@ -105,7 +121,7 @@ print(table.get("key2")) #64
 ```
 #### Get value by key
 To get the value call `get` method fron the `Table` class with table and key. Returns the value.
-Pass the name of the key as first.
+Pass the name of the key as the first parameter.
 
 ```python
 a = table.get("key2")
@@ -114,7 +130,7 @@ print(table.get("key2")) #a
 ```
 
 #### Delete items
-To delete value by key call `delete` method from the `Table` class. Returns `True` if the deletion is successful otherwise `False`. Pass the name of the key as first.
+To delete value by key call `delete` method from the `Table` class. Returns `True` if the deletion is successful otherwise `False`. Pass the name of the key as the first parameter.
 ```python
 result = table.delete("key1");
 print(result) #True
