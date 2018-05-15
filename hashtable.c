@@ -91,11 +91,43 @@ tb_hash_table *tb_create_hash_table(size_t size) {
     return table;
 }
 
+/*
+    Returns the position of a item, if a item with this key is exists. 
+    Otherwise returns -1.
+ */
+int32_t tb_find_item(tb_hash_table * table, const char *key) {
+    uint32_t index = 0;
+    while (index < table->size) {
+        tb_hash_table_item *item = table->items[index];
+        if (item != NULL && item != &DELETED) {
+            if (strcmp(item->key, key) == 0) {
+                return index;
+            } 
+        }
+        index++;
+    }
+    return -1;
+}
+
+/*
+    Returns the item at the position. If item is deleted return {NULL, NULL}.
+    Otherwise returns null pointer.
+ */
+tb_hash_table_item *tb_item_at(tb_hash_table *table, uint32_t pos) {
+    tb_hash_table_item *item = table->items[pos];
+    if (item != &DELETED) {
+        return item;
+    } else {
+        return &DELETED;
+    }
+    return NULL;
+}
+
 /* 
     function inserts value by key into table.
     nothing to returns
 */
-void tb_insert_item(tb_hash_table *table, const char *key, const void *val) {
+uint32_t tb_insert_item(tb_hash_table *table, const char *key, const void *val) {
     tb_hash_table_item *new_item, *current_item; 
     uint32_t index, try;
     // get new hash_table_item, value by key 
@@ -114,7 +146,7 @@ void tb_insert_item(tb_hash_table *table, const char *key, const void *val) {
                 // delete current value by key, set new value by key
                 tb_delete_table_item(current_item);
                 table->items[index] = new_item;
-                return;
+                return index;
             }
             if (table->size == table->count) {
                 SEG;
@@ -134,6 +166,7 @@ void tb_insert_item(tb_hash_table *table, const char *key, const void *val) {
     table->items[index] = new_item;
     table->count++;
     table->empty = 0;
+    return index;
 }
 
 /* 
