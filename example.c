@@ -4,6 +4,7 @@
 */
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "hashtable.h"
 
@@ -16,13 +17,19 @@ typedef struct {
 } Example;
 
 
-void example() {
+void example_create_table() {
     tb_hash_table *table = tb_create_hash_table(6);
     printf("%s", "Example of an empty table");
     printf("\n");
     if (table->empty) {
-        printf("%s", "table is empty");
+        printf("%s", "table is empty\n");
     }
+    tb_delete_hash_table(table);
+    printf("\n");
+}
+
+void example_insert_get_values() {
+    tb_hash_table *table = tb_create_hash_table(6);
     printf("%s", "Example of the value `integer`");
     printf("\n");
     int a = 15;
@@ -79,22 +86,39 @@ void example() {
     printf("\n");
     printf("pointer on example struct %p", struct_example_value);
     printf("\n");
-    printf("%s", "Example of a non-empty table");
-    printf("\n");
-    if (!table->empty) {
-        printf("%s", "table isn`t empty");
-    }
-    printf("\n");
-    printf("%s", "Example an empty table");
-    printf("\n");
-    tb_delete_item(table, "key1");
-    tb_delete_item(table, "key2");
-    tb_delete_item(table, "key3");
-    tb_delete_item(table, "key4");
-    tb_delete_item(table, "key5");
-    tb_delete_item(table, "key6");
-    if (table->empty) {
-        printf("%s", "Table is empty");
-    }
     tb_delete_hash_table(table);
+    printf("\n");
+}
+
+void example_delete_items() {
+    tb_hash_table *table = tb_create_hash_table(5000);
+    for (int i = 1; i < 5001; i++) {
+        char *key = malloc(sizeof(char *));
+        sprintf(key, "key_%i", i);
+        uint32_t pos = tb_insert_item(table, key, &i);
+        if (pos == i) {
+            continue;
+        }
+    }
+    
+    printf("size: %u\n", table->count);
+
+    for (int i = 1; i < 5001; i++) {
+        char *key = malloc(sizeof(char *));
+        sprintf(key, "key_%i", i);
+        int del = tb_delete_item(table, key);
+        if (del) {
+            continue;
+        }
+    }
+    
+    printf("size: %u", table->count);
+    tb_delete_hash_table(table);
+    printf("\n");
+}
+
+void example() {
+    example_create_table();
+    example_insert_get_values();
+    example_delete_items();
 }
