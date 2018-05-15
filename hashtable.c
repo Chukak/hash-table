@@ -77,7 +77,7 @@ static uint32_t hash(const char *key, const uint32_t num, const int32_t try) {
     function creates a new table in memory.
     returns pointer to table.
 */
-tb_hash_table *tb_create_hash_table(size_t size){
+tb_hash_table *tb_create_hash_table(size_t size) {
     if (size == 0) {
         return (void *)0;
     }
@@ -127,7 +127,7 @@ void tb_insert_item(tb_hash_table *table, const char *key, const void *val) {
         index = hash(new_item->key, table->size, try);
 	// get new current item
         current_item = table->items[index];
-	// +1 attempts
+        // +1 attempts
         try++;
     }
     // set new item and count
@@ -155,6 +155,36 @@ void *tb_get_value(tb_hash_table *table, const char *key) {
             if (strcmp(item->key, key) == 0) {
                 // return value by key
                 return item->val;
+            }
+        }
+	// get new item, +1 attempts    
+        index = hash(key, table->size, try);
+        item = table->items[index];
+        try++;
+    }
+    // if nothing if found, return NULL
+    return NULL;
+}
+
+/* 
+    function gets item by key.
+    returns pointer to item.
+*/
+tb_hash_table_item *tb_get_item(tb_hash_table *table, const char *key) {
+    uint32_t index, try; 
+    // number of attempts
+    try = 1;
+    // get new hash
+    index = hash(key, table->size, 0);
+    // get item
+    tb_hash_table_item *item = table->items[index];
+    while (item != NULL) {
+        // check if item is not deleted
+	if (item != &DELETED) {
+            // check key and item.key 
+            if (strcmp(item->key, key) == 0) {
+                // return value by key
+                return item;
             }
         }
 	// get new item, +1 attempts    
@@ -203,10 +233,10 @@ int tb_delete_item(tb_hash_table *table, const char *key) {
 	item = table->items[index];
         try++;
     }
-    if (table->count == 0) {
-        // raises if the key isn`t in the table
-        SEG; 
-    }
+    //if (table->count == 0) {
+    //    // raises if the key isn`t in the table
+    //    SEG; 
+    //}
     return 0;
 }
 
