@@ -13,15 +13,15 @@
 #define SEG raise(SIGSEGV)
 
 /* 
-    static variable DELETED_ITEM, for check all deleted items in table.
-    key and val must be null.
+    Static variable DELETED_ITEM, for check all deleted items in table.
+    Key and val must be null.
 */
 static tb_hash_table_item DELETED = {NULL, NULL};
 
 /* 
-    static function, creates a new hash_table_item.
-    sets value by key in table and returns pointer to item .
-    Item example: {'key' : 'value'} .
+    Static function, creates a new hash_table_item.
+    Sets value by key in table and returns pointer to item .
+    Item example: {'key' : value} .
 
     strdup not ANSI func. 
     strdup call malloc func, allocates memory for string, 
@@ -36,8 +36,8 @@ static tb_hash_table_item *tb_new_table_item(const char *key, const void *val) {
 }
 
 /*
-    static function, removes hash_table_item from memory.
-    nothing to returns.
+    Static function, removes hash_table_item from memory.
+    Nothing to returns.
  */
 static void tb_delete_table_item(tb_hash_table_item *item) {
     free(item->key);
@@ -46,7 +46,7 @@ static void tb_delete_table_item(tb_hash_table_item *item) {
 }
 
 /* 
-    funtion returns hash for strings.
+    Static funtion, returns a new hash for strings.
 */
 static int64_t get_hash(const char *key, uint32_t num) {
     uint64_t h = 0;
@@ -57,15 +57,13 @@ static int64_t get_hash(const char *key, uint32_t num) {
 }
 
 /* 
-    double hashing function for resolve hash collisions.
-    more information https://en.wikipedia.org/wiki/Double_hashing .
-    returns hash.
+    Double hashing function for resolve hash collisions.
+    More information https://en.wikipedia.org/wiki/Double_hashing .
+    Returns hash.
 */ 
 static uint32_t hash(const char *key, const uint32_t num, const int32_t try) {
     uint32_t hash_a = get_hash(key, num);
     uint32_t hash_b = get_hash(key, num);
-    //printf("a: %u", hash_a);
-    //printf("b: %u", hash_b);
     // variables: try is attempts, num is array size
     // formula: hash_a(key) + try * hash_b(key) mod size
     // if hash_b == 0 then 1. This guarantees that hash_b never be zero 
@@ -74,8 +72,8 @@ static uint32_t hash(const char *key, const uint32_t num, const int32_t try) {
 } 
 
 /* 
-    function creates a new table in memory.
-    returns pointer to table.
+    Function creates a new table in memory.
+    Returns pointer to table.
 */
 tb_hash_table *tb_create_hash_table(size_t size) {
     if (size <= 0) {
@@ -129,8 +127,8 @@ tb_hash_table_item *tb_item_at(tb_hash_table *table, uint32_t pos) {
 }
 
 /* 
-    function inserts value by key into table.
-    nothing to returns
+    Function inserts value by key into table.
+    Returns the position of item.
 */
 uint32_t tb_insert_item(tb_hash_table *table, const char *key, const void *val) {
     tb_hash_table_item *new_item, *current_item; 
@@ -175,8 +173,8 @@ uint32_t tb_insert_item(tb_hash_table *table, const char *key, const void *val) 
 }
 
 /* 
-    function gets value by key.
-    returns pointer to value.
+    Function gets value by key.
+    Returns pointer to value.
 */
 void *tb_get_value(tb_hash_table *table, const char *key) {
     if (table->empty) {
@@ -214,8 +212,8 @@ void *tb_get_value(tb_hash_table *table, const char *key) {
 }
 
 /* 
-    function gets item by key.
-    returns pointer to item.
+    Function gets item by key.
+    Returns pointer to item.
 */
 tb_hash_table_item *tb_get_item(tb_hash_table *table, const char *key) {
     uint32_t index, try;
@@ -250,8 +248,9 @@ tb_hash_table_item *tb_get_item(tb_hash_table *table, const char *key) {
 }
 
 /* 
-    function removes value by key from table.
-    nothing to returns.
+    Function removes value by key from table.
+    Returns 1 if the deletion is successful, otherwise returns 0.
+    Also, if the key if not in the table, returns 0.
 */
 int tb_delete_item(tb_hash_table *table, const char *key) {
     if (!table->count) {
@@ -295,8 +294,8 @@ int tb_delete_item(tb_hash_table *table, const char *key) {
 }
 
 /* 
-    function removes table from memory.
-    nothing of return.
+    Function removes table from memory.
+    Nothing of return.
 */
 void tb_delete_hash_table(tb_hash_table *table) {
     tb_hash_table_item *item;
