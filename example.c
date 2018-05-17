@@ -91,8 +91,39 @@ void example_insert_get_values() {
 }
 
 void example_delete_items() {
-    tb_hash_table *table = tb_create_hash_table(5000);
-    for (int i = 1; i < 5001; i++) {
+    tb_hash_table *table = tb_create_hash_table(10000);
+    char *key = malloc(sizeof(char *));
+    for (int i = 1; i < 10001; i++) {
+        sprintf(key, "key_%i", i);
+        uint32_t pos = tb_insert_item(table, key, &i);
+        if (pos >= 0 && pos <= table->size) 
+            continue;
+    }
+    
+    printf("search\n");
+    tb_hash_table_item *item = tb_find_item(table, "key_9999");
+    printf("item: %s", item->key);
+    free(key);
+    printf("size: %u\n", table->count);
+    
+    char *key_2 = malloc(sizeof(char *));
+    for (int i = 1; i < 35; i++) {
+        sprintf(key_2, "key_%i", i);
+        int del = tb_delete_item(table, key_2);
+        if (del) {
+            printf("item is deleted");
+        } 
+    } 
+    free(key_2);
+    
+    printf("count: %u\n", table->count);
+    tb_delete_hash_table(table);
+    printf("\n");
+}
+
+void example_extra() {
+    tb_hash_table *table = tb_create_hash_table(2);
+    for (int i = 1; i < 3; i++) {
         char *key = malloc(sizeof(char *));
         sprintf(key, "key_%i", i);
         uint32_t pos = tb_insert_item(table, key, &i);
@@ -102,16 +133,12 @@ void example_delete_items() {
     }
     
     printf("size: %u\n", table->count);
-
-    for (int i = 1; i < 5001; i++) {
-        char *key = malloc(sizeof(char *));
-        sprintf(key, "key_%i", i);
-        int del = tb_delete_item(table, key);
-        if (del) {
-            continue;
-        }
-    }
     
+    tb_hash_table_item *item = tb_get_item(table, "key_67823");
+    printf("key: %s", item->key);
+    tb_hash_table_item *item_2 = tb_find_item(table, "key_67823");
+    printf("item key: %s\n", item_2->key);
+
     printf("size: %u", table->count);
     tb_delete_hash_table(table);
     printf("\n");
@@ -121,4 +148,5 @@ void example() {
     example_create_table();
     example_insert_get_values();
     example_delete_items();
+    example_extra();
 }
