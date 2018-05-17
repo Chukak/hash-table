@@ -1,7 +1,6 @@
 #include <python3.5/Python.h>
 #include <python3.5/structmember.h>
 #include "../hashtable.h"
-#include <stdio.h>
 
 #define get_pointer(type, pointer) ({ \
     __typeof__(type*) value = pointer; \
@@ -84,13 +83,13 @@ PyHashTable_get(PyObject *self, PyObject *args)
         return NULL;
     }
     PyHashTable *h_table = (PyHashTable *)self;
-    if (!h_table) {
+    if (h_table == NULL) {
         PyErr_SetString(PyExc_RuntimeError, "The pointer on the hashtable is NULL.");
         PyErr_Print();
         return NULL;
     }
     void *p = tb_get_value(h_table->table, key);
-    if (!p) {
+    if (p == NULL) {
         Py_RETURN_NONE;
     }
     PyObject *value = get_pointer(PyObject *, p);
@@ -121,18 +120,18 @@ PyHashTable_insert(PyObject *self, PyObject *args)
         return NULL;
     }
     PyHashTable *h_table = (PyHashTable *)self;
-    if (!h_table) {
+    if (h_table == NULL) {
         PyErr_SetString(PyExc_RuntimeError, "The pointer on the hashtable is NULL.");
         return NULL;
     }
     Py_INCREF(value);
-    if (!value) {
+    if (value == NULL) {
         return NULL;
     }
-    tb_insert_item(h_table->table, key, &value);
+    uint32_t pos = tb_insert_item(h_table->table, key, &value);
     h_table->count = h_table->table->count;
     h_table->empty = h_table->table->empty;
-    return Py_BuildValue("N", PyBool_FromLong(1));
+    return Py_BuildValue("I", pos);
 }
 
 static PyObject *
@@ -144,7 +143,7 @@ PyHashTable_delete(PyObject *self, PyObject *args)
         return NULL;
     }
     PyHashTable *h_table = (PyHashTable *)self;
-    if (!h_table) {
+    if (h_table == NULL) {
         PyErr_SetString(PyExc_RuntimeError, "The pointer on the hashtable is NULL.");
         return NULL;
     }
@@ -155,6 +154,58 @@ PyHashTable_delete(PyObject *self, PyObject *args)
     return Py_BuildValue("N", PyBool_FromLong(del));
 }
 
+static PyObject *
+PyHashTable_find(PyObject *self, PyObject *args)
+{
+   char *key;
+    if (!PyArg_Parse(args, "s", &key)) {
+        PyErr_SetString(PyExc_TypeError, "The key must be a string.");
+        return NULL;
+    } 
+    PyHashTable *h_table = (PyHashTable *)self;
+    if (!h_table) {
+        PyErr_SetString(PyExc_RuntimeError, "The pointer on the hashtable is NULL.");
+        return NULL;
+    }
+    tb_hash_table_item *item = tb_find_item(h_table->table, key);
+    if (item == NULL) {
+        return Py_BuildValue("(s, O)", "", Py_None);
+    }
+    void *p = item->val;
+    if (p == NULL) {
+        return Py_BuildValue("(s, O)", key, Py_None);
+    }
+    PyObject *value = get_pointer(PyObject *, p);
+    return Py_BuildValue("(s, O)", key, value);
+}
+
+static PyObject *
+PyHashTable_at(PyObject *self, PyObject *args)
+{
+    int pos;
+    if (!PyArg_Parse(args, "i", &pos)) {
+        PyErr_SetString(PyExc_TypeError, "The position must be an integer.");
+        return NULL;
+    } 
+    PyHashTable *h_table = (PyHashTable *)self;
+    if (!h_table) {
+        PyErr_SetString(PyExc_RuntimeError, "The pointer on the hashtable is NULL.");
+        return NULL;
+    }
+    tb_hash_table_item *item = tb_item_at(h_table->table, pos);
+    if (item == NULL) {
+        return Py_BuildValue("(s, O)", "", Py_None);
+    }
+    if (item->val == NULL && item->key == NULL) {
+        return Py_BuildValue("(O, O)", Py_None, Py_None);
+    }
+    void *p = item->val;
+    if (p == NULL) {
+        return Py_BuildValue("(s, O)", item->key, Py_None);
+    }
+    PyObject *value = get_pointer(PyObject *, p);
+    return Py_BuildValue("(s, O)", item->key, value);
+}
 
 static PyMemberDef PyHashTable_members[] = {
     {
@@ -198,6 +249,18 @@ static PyMethodDef PyHashTable_methods[] = {
         (PyCFunction)PyHashTable_delete,
         METH_O,
         ""
+    },
+    {
+        "find",
+        (PyCFunction)PyHashTable_find,
+        METH_O,
+        "",
+    },
+    {
+        "at",
+        (PyCFunction)PyHashTable_at,
+        METH_O,
+        "",
     },
     {NULL}
 };
