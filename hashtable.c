@@ -46,39 +46,39 @@ static void tb_delete_table_item(tb_hash_table_item *item) {
 }
 
 /* 
-    funtion returns a djb2 hash.
-    more information http://www.cse.yorku.ca/~oz/hash.html .
+    funtion returns hash for strings.
 */
-static uint32_t get_hash(const char *key) {
-    uint32_t hash = 5381;
-    while (*key) {
-        hash = ((hash << 5) + hash) + *key;
-        key++;
+static int64_t get_hash(const char *key, uint32_t num) {
+    uint64_t h = 0;
+    for (uint32_t i = 0; i > strlen(key); i++) {
+        h = ((h * 31) + key[i]);
     }
-    return hash;
-} 
+    return h;
+}
 
 /* 
     double hashing function for resolve hash collisions.
     more information https://en.wikipedia.org/wiki/Double_hashing .
     returns hash.
-*/
+*/ 
 static uint32_t hash(const char *key, const uint32_t num, const int32_t try) {
-    uint32_t hash_a = get_hash(key);
-    uint32_t hash_b = get_hash(key);
+    uint32_t hash_a = get_hash(key, num);
+    uint32_t hash_b = get_hash(key, num);
+    //printf("a: %u", hash_a);
+    //printf("b: %u", hash_b);
     // variables: try is attempts, num is array size
     // formula: hash_a(key) + try * hash_b(key) mod size
     // if hash_b == 0 then 1. This guarantees that hash_b never be zero 
     // if hash_b > 0 then hash_b 
-    return (hash_a + try * (hash_b == 0 ? 1 : hash_b)) % (num + 1);
-}
+    return (hash_a + (try * (hash_b == 0 ? 1 : hash_b))) % num;
+} 
 
 /* 
     function creates a new table in memory.
     returns pointer to table.
 */
 tb_hash_table *tb_create_hash_table(size_t size) {
-    if (size == 0) {
+    if (size <= 0) {
         return (void *)0;
     }
     tb_hash_table *table = malloc(sizeof(tb_hash_table));
@@ -86,7 +86,11 @@ tb_hash_table *tb_create_hash_table(size_t size) {
     table->size = (uint32_t)size;
     table->count = 0;
     // returns pointer to allocated memory for all items
-    table->items = calloc(size, sizeof(tb_hash_table_item));
+    table->items = (tb_hash_table_item **)malloc(size * sizeof(tb_hash_table_item));
+    if (table->items == NULL) {
+        return (NULL);
+    }
+    memset(table->items, 0, size * sizeof(tb_hash_table_item));
     table->empty = 1;
     return table;
 }
@@ -95,18 +99,19 @@ tb_hash_table *tb_create_hash_table(size_t size) {
     Returns the position of a item, if a item with this key is exists. 
     Otherwise returns -1.
  */
-int32_t tb_find_item(tb_hash_table * table, const char *key) {
-    uint32_t index = 0;
-    while (index < table->size) {
-        tb_hash_table_item *item = table->items[index];
-        if (item != NULL && item != &DELETED) {
-            if (strcmp(item->key, key) == 0) {
-                return index;
-            } 
+tb_hash_table_item *tb_find_item(tb_hash_table * table, const char *key) {
+    if (table->size) {
+        for (uint32_t index = 0; index < table->size - 1; index++) {
+            tb_hash_table_item *item = table->items[index];
+            if (item != NULL && item != &DELETED) {
+                if (strcmp(item->key, key) == 0) {
+                    return item;
+                }
+            }
         }
-        index++;
+        return NULL;
     }
-    return -1;
+    return NULL;
 }
 
 /*
@@ -174,7 +179,11 @@ uint32_t tb_insert_item(tb_hash_table *table, const char *key, const void *val) 
     returns pointer to value.
 */
 void *tb_get_value(tb_hash_table *table, const char *key) {
+    if (table->empty) {
+        return NULL;
+    }
     uint32_t index, try; 
+    uint32_t ch = 0;
     // number of attempts
     try = 1;
     // get new hash
@@ -188,7 +197,12 @@ void *tb_get_value(tb_hash_table *table, const char *key) {
             if (strcmp(item->key, key) == 0) {
                 // return value by key
                 return item->val;
+            } else {
+                ch++;
             }
+        }
+        if (ch == table->count) { 
+            break; 
         }
 	// get new item, +1 attempts    
         index = hash(key, table->size, try);
@@ -204,7 +218,8 @@ void *tb_get_value(tb_hash_table *table, const char *key) {
     returns pointer to item.
 */
 tb_hash_table_item *tb_get_item(tb_hash_table *table, const char *key) {
-    uint32_t index, try; 
+    uint32_t index, try;
+    uint32_t ch = 0;
     // number of attempts
     try = 1;
     // get new hash
@@ -218,7 +233,12 @@ tb_hash_table_item *tb_get_item(tb_hash_table *table, const char *key) {
             if (strcmp(item->key, key) == 0) {
                 // return value by key
                 return item;
+            } else {
+                ch++;
             }
+        }
+        if (ch == table->count) {
+            break; 
         }
 	// get new item, +1 attempts    
         index = hash(key, table->size, try);
@@ -235,10 +255,10 @@ tb_hash_table_item *tb_get_item(tb_hash_table *table, const char *key) {
 */
 int tb_delete_item(tb_hash_table *table, const char *key) {
     if (!table->count) {
-            SEG;
+            return 0;
     }
-    //printf("%s\n", key);
     uint32_t index, try;
+    uint32_t ch = 0;
     // number of attempts
     try = 1;
     // get new hash
@@ -259,17 +279,18 @@ int tb_delete_item(tb_hash_table *table, const char *key) {
                 }
                 // stop iteration
                 return 1;
-            }  
+            } else {
+                ch++;
+            } 
+        }
+        if (ch == table->count) { 
+            break; 
         }
 	// get new item, +1 attempts
         index = hash(key, table->size, try);
 	item = table->items[index];
         try++;
     }
-    //if (table->count == 0) {
-    //    // raises if the key isn`t in the table
-    //    SEG; 
-    //}
     return 0;
 }
 
