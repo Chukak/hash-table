@@ -111,25 +111,25 @@ for (unsigned int i = 0; i < table->size; i++) {
 }
 ```
 If the index is out of range `0` to `table->size`:
-```
+```c
 for (unsigned int i = 0; i < table->size + 10; i++) {
     unsigned int pos = tb_insert_item(table, "key"); // raises seg fault
 }
 ```
 
-```
+```c
 for (unsigned int i = 0; i < table->size + 10; i++) {
     void *p = tb_get_value(table, "key"); // returns NULL 
 }
 ```
 
-```
+```c
 for (unsigned int i = 0; i < table->size + 10; i++) {
     int delete = tb_delete_item(table, "key"); // returns 0 
 }
 ```
 
-```
+```c
 tb_hash_table_item *item = tb_item_at(table, index); returns NULL;
 ```
 
