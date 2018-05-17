@@ -117,11 +117,13 @@ tb_hash_table_item *tb_find_item(tb_hash_table * table, const char *key) {
     Otherwise returns null pointer.
  */
 tb_hash_table_item *tb_item_at(tb_hash_table *table, uint32_t pos) {
-    tb_hash_table_item *item = table->items[pos];
-    if (item != &DELETED) {
-        return item;
-    } else {
-        return &DELETED;
+    if (pos <= table->size) {
+        tb_hash_table_item *item = table->items[pos];
+        if (item != &DELETED) {
+            return item;
+        } else {
+            return &DELETED;
+        } 
     }
     return NULL;
 }
