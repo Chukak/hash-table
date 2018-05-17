@@ -23,7 +23,8 @@ class TestsHashTable(unittest.TestCase):
 
         for n in range(1, 5001):
             in_ = table.insert("key_" + str(n), n)
-            self.assertTrue(in_)
+            self.assertGreaterEqual(in_, 0)
+            self.assertLess(in_, table.size)
 
         self.assertEqual(table.count, 5000)
         self.assertFalse(table.empty)
@@ -41,7 +42,8 @@ class TestsHashTable(unittest.TestCase):
 
         for n in range(1, 5000 + 1):
             in_ = table.insert("key_" + str(n), n)
-            self.assertTrue(in_)
+            self.assertGreaterEqual(in_, 0)
+            self.assertLess(in_, table.size)
 
         self.assertEqual(table.count, 5000)
         self.assertFalse(table.empty)
@@ -81,7 +83,8 @@ class TestsHashTable(unittest.TestCase):
         for n in range(1, 5000 + 1):
             try:
                 in_ = table.insert(n, n)
-                self.assertTrue(in_)
+                self.assertGreaterEqual(in_, 0)
+                self.assertLess(in_, table.size)
             except Exception as e:
                 self.assertEqual(type(e), TypeError)
 
@@ -95,7 +98,8 @@ class TestsHashTable(unittest.TestCase):
 
         for n in range(1, 5000 + 1):
             in_ = table.insert("key_" + str(n), n)
-            self.assertTrue(in_)
+            self.assertGreaterEqual(in_, 0)
+            self.assertLess(in_, table.size)
 
         self.assertEqual(5000, table.count, msg="Must be zero.")
         self.assertFalse(table.empty, msg="The table must be empty.")
@@ -123,27 +127,111 @@ class TestsHashTable(unittest.TestCase):
         del table
 
     def test_seven(self):
-        table = Table(500000)
-        self.assertEqual(table.size, 500000, msg="The values are not the same.")
+        table = Table(5000)
+        self.assertEqual(table.size, 5000, msg="The values are not the same.")
         self.assertEqual(0, table.count, msg="Must be zero.")
         self.assertTrue(table.empty, msg="The table must be empty.")
 
-        for n in range(1, 500000 + 1):
+        for n in range(1, 5000 + 1):
             in_ = table.insert("key_" + str(n), n)
-            self.assertTrue(in_)
+            self.assertGreaterEqual(in_, 0)
+            self.assertLess(in_, table.size)
 
-        self.assertEqual(500000, table.count, msg="Must be zero.")
+        self.assertEqual(5000, table.count, msg="Must be zero.")
         self.assertFalse(table.empty, msg="The table must be empty.")
 
-        for m in range(1, 500000 + 1):
+        for m in range(1, 5000 + 1):
             value = table.get("key_" + str(m))
             self.assertEqual(value, m)
 
-        for b in range(1, 500000 + 1):
+        for b in range(1, 5000 + 1):
             check = table.delete("key_" + str(b))
             self.assertTrue(check)
         self.assertEqual(table.count, 0)
         self.assertTrue(table.empty)
+
+        del table
+
+    def test_eight(self):
+        table = Table(5000)
+        self.assertEqual(table.size, 5000, msg="The values are not the same.")
+        self.assertEqual(0, table.count, msg="Must be zero.")
+        self.assertTrue(table.empty, msg="The table must be empty.")
+
+        for n in range(1, 5000 + 1):
+            in_ = table.insert("key_" + str(n), n)
+            self.assertGreaterEqual(in_, 0)
+            self.assertLess(in_, table.size)
+
+        self.assertEqual(5000, table.count, msg="Must be zero.")
+        self.assertFalse(table.empty, msg="The table must be empty.")
+
+        key, value = table.find("key_4567")
+        self.assertEqual(key, "key_4567")
+        self.assertEqual(value, 4567)
+
+        key, value = table.find("key_12")
+        self.assertEqual(key, "key_12")
+        self.assertEqual(value, 12)
+
+        key, value = table.find("key_2342")
+        self.assertEqual(key, "key_2342")
+        self.assertEqual(value, 2342)
+
+        key, value = table.find("key_795456")
+        self.assertEqual(key, "")
+        self.assertEqual(value, None)
+
+        del table
+
+    def test_eight(self):
+        table = Table(5000)
+        self.assertEqual(table.size, 5000, msg="The values are not the same.")
+        self.assertEqual(0, table.count, msg="Must be zero.")
+        self.assertTrue(table.empty, msg="The table must be empty.")
+
+        for n in range(1, 5000 + 1):
+            in_ = table.insert("key_" + str(n), n)
+            self.assertGreaterEqual(in_, 0)
+            self.assertLess(in_, table.size)
+
+        self.assertEqual(5000, table.count, msg="Must be zero.")
+        self.assertFalse(table.empty, msg="The table must be empty.")
+
+        key, value = table.at(4567)
+        print(type(key), type(value))
+        self.assertIs(type(key), type(""))
+        self.assertIs(type(value), type(0))
+
+        key, value = table.at(12)
+        self.assertIs(type(key), type(""))
+        self.assertIs(type(value), type(0))
+
+        key, value = table.at(2342)
+        self.assertIs(type(key), type(""))
+        self.assertIs(type(value), type(0))
+
+        key, value = table.at(78456)
+        self.assertEqual(key, "")
+        self.assertEqual(value, None)
+
+        check = table.delete("key_675")
+        self.assertTrue(check)
+
+        in_ = table.insert("key86345", 67435)
+        self.assertGreaterEqual(in_, 0)
+        self.assertLess(in_, table.size)
+
+        key, value = table.at(in_)
+        self.assertEqual(key, "key86345")
+        self.assertEqual(value, 67435)
+
+        check = table.delete("key86345")
+        self.assertTrue(check)
+
+        key, value = table.at(in_)
+        self.assertEqual(key, None)
+        self.assertEqual(value, None)
 
         del table
 
