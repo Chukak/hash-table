@@ -17,71 +17,126 @@ make -f LibraryMakefile
 ## How to use
 ### Create table
 Create a table with a static size. Call `tb_create_hash_table` function. Pass the size as the first parameter.
+Returns a pointer on the table or NULL.
 ```c
 tb_hash_table *table = tb_create_hash_table(size);
 ```
+If the size is zero, returns NULL.
+```c
+tb_hash_table *table = tb_create_hash_table(0);
+if (!table)
+    ...
+```
 
 ### Insert items
-Create the variable, that you want to pass to the table. 
+Create the variable, that you want to put to the table. 
 Call `tb_insert_item` function with table, key and value. 
 Pass the table as the first parameter, the name of the key as the second, and the address on your variable as the third.
-Returns the position of the item. 
+Returns the position of the item. The position is a `unsigned int` or `uint32_t` from `stdint.h`.
 ```c
 int a = 1;
-long int pos = tb_insert_item(table, "key1", &a);
+unsigned int pos = tb_insert_item(table, "key1", &a);
 char *string = "example";
-long int pos = tb_insert_item(table, "key2", &string);
+unsigned int pos = tb_insert_item(table, "key2", &string);
 ```
 
 ### Change value
 Call `tb_insert_item` function with the name of the key, if you want to change the value by key.
 ```c
-int *int_value = tb_get_value(table, "key1");
-printf("%i", *int_value); // print 1
+int *value = tb_get_value(table, "key1");
+printf("%i", *value); // print 1
 int b = 2;
 tb_insert_item(table, "key1", &b);
-int *int_other_value = tb_get_value(table, "key1");
-printf("%i", *int_other_value); // print 2
+int *new_value = tb_get_value(table, "key1");
+printf("%i", *new_value); // print 2
 ```
-### Get value by key
-To get the value call `tb_get_value` function with table and key. Funciton returns apointer to a value.
-Pass the table as the first parameter and the name of the key as the second.
 
+### Get value by key
+To get the value call `tb_get_value` function with table and key. 
+Pass the table as the first parameter and the name of the key as the second.
+Returns a pointer on the value by key. If an item does not exists in the table, returns NULL;
 ```c
-int *int_value = tb_get_value(table, "key1");
-printf("%i", *int_value); // print 1
+int *value = tb_get_value(table, "key1");
+printf("%i", *value); // print 1
 // function returns pointer on `char *`
-char **string_value = tb_get_value(table, "key2");
-printf("%i", *string_value); // print example
+char *example = "example";
+tb_insert_item(table, "key2", &example);
+char **string = tb_get_value(table, "key2");
+printf("%i", *string); // print "example"
 ```
 
 ### Delete items
-To delete value by key call `tb_delete_item` funtion. 
+To delete the value by key call `tb_delete_item` funtion. 
 Pass the table as the first parameter and the name of the key as the second.
 Returns 1 if the item is deleted, otherwise returns 0.
 ```c
 int check = tb_delete_item(table, "key1");
-// segmentation fault error
-int *int_value = tb_get_value(table, "key1");
-```
 
-### Delete table
-To delete table call `tb_delete_hash_table` function. Pass the table as the first parameter.
-```c
-tb_delete_hash_table(table);
+type *value = tb_get_value(table, "key1");
+printf("%p", value); // print (nil)
 ```
 
 ### Get an item 
 To get the item call `tb_get_item` function. Pass the table as the first parameter, the key as the second.
+Returns the pointer to an item or NULL, if an item does not exists. 
 ```c
 tb_hash_table_item *item = tb_get_item(table, "key");
 printf("%s", item->key);
 ```
 
 ### Get an item from the position
-To get the item from the position call `tb_item_at` function. Pass the table as the first parameter, the position as the second.
+To get the item from the position call `tb_item_at` function. 
+Pass the table as the first parameter, the position as the second.
+Returns the pointer to an item or NULL, if an item does not exists. If an item is deleted, returns pointer to the structure of `{NULL, NULL}`.
 ```c
 tb_hash_table_item *item = tb_item_at(table, 1);
+```
+
+### Find an item
+To find the item call `tb_find_item` function. 
+Pass the table as the first parameter, the key as the second.
+Returns the pointer to an item or NULL, if item does not exists. 
+```c
+tb_hash_table_item *item = tb_find_item(table, "key");
+```
+
+### For loop
+In the `for` loop, you must check the pointer to the item. 
+```c
+for (unsigned int i = 0; i < table->size; i++) {
+    tb_hash_table_item *item = table.items[i];
+    if (item != NULL) {
+      ...
+    }
+}
+```
+If the index is out of range `0` to `table->size`:
+```
+for (unsigned int i = 0; i < table->size + 10; i++) {
+    unsigned int pos = tb_insert_item(table, "key"); // raises seg fault
+}
+```
+
+```
+for (unsigned int i = 0; i < table->size + 10; i++) {
+    void *p = tb_get_value(table, "key"); // returns NULL 
+}
+```
+
+```
+for (unsigned int i = 0; i < table->size + 10; i++) {
+    int delete = tb_delete_item(table, "key"); // returns 0 
+}
+```
+
+```
+tb_hash_table_item *item = tb_item_at(table, index); returns NULL;
+```
+
+### Delete table
+To delete table call `tb_delete_hash_table` function. Pass the table as the first parameter.
+```c
+tb_delete_hash_table(table);
 ```
 
 ## Python
@@ -104,10 +159,10 @@ table = Table(size);
 ```
 
 #### Insert items
-Call the `insert` method from the `Table` class. Returns `True` if the deletion is successful otherwise `False`. Pass the name of the key as the first parameter, the value as the second. 
+Call the `insert` method from the `Table` class. Pass the name of the key as the first parameter, the value as the second.
+Returns the position of the item.
 ```python
-result = table.insert("key1", 45)
-print(result) #True
+pos = table.insert("key1", 45)
 ```
 
 #### Change value
@@ -121,25 +176,41 @@ print(table.get("key2")) #64
 ```
 #### Get value by key
 To get the value call `get` method fron the `Table` class with table and key. Returns the value.
-Pass the name of the key as the first parameter.
+Pass the name of the key as the first parameter. Returns the value by key. If an item does not exists in the table, returns None;
 
 ```python
 a = table.get("key2")
 print(a) 
-print(table.get("key2")) #a
 ```
 
 #### Delete items
 To delete value by key call `delete` method from the `Table` class. Returns `True` if the deletion is successful otherwise `False`. Pass the name of the key as the first parameter.
 ```python
-result = table.delete("key1");
-print(result) #True
+deletion = table.delete("key1");
+if deletion: 
+    ...
 a = table.get("key1")
 print(a) # None
 ```
 
+#### Get an item from the position
+To get the item from the position call `at` method from the `Table` class. 
+Pass the the position as the first parameter.
+Returns the item or ("", None), if an item does not exists. If an item is deleted, returns the tuple of `(None, None)`.
+```python
+key, value = table.at(1);
+```
+
+### Find an item
+To find the item call `find` method from the `Table` class. 
+Pass the key as the first parameter.
+Returns the item or ("", None), if item does not exists. 
+```python
+key, value = table("key");
+```
+
 #### Delete table
-To delete table call `del`. 
+To delete a table call `del`. 
 ```python
 del table
 ```
