@@ -15,6 +15,12 @@ typedef struct {
     uint32_t empty;
 } PyHashTable;
 
+typedef struct {
+    PyObject_HEAD
+    uint32_t index;
+    uint32_t size;
+    tb_hash_table_item **items;
+} PyHashTableItems;
 
 struct module_state {
     PyObject *error;
@@ -207,6 +213,116 @@ PyHashTable_at(PyObject *self, PyObject *args)
     return Py_BuildValue("(s, O)", item->key, value);
 }
 
+static PyObject *
+PyHashTableItems_iter(PyObject *self) 
+{
+    Py_INCREF(self);
+    return self;
+}
+
+static PyObject *
+PyHashTableItems_iternext(PyObject *self)
+{
+    PyHashTableItems *iter = (PyHashTableItems *)self;
+    PyObject *value = NULL;
+    if (iter == NULL) {
+        PyErr_SetString(PyExc_RuntimeError, "The pointer on the hashtable is NULL.");
+        return NULL;
+    }
+    while (iter->index < iter->size && iter->index >= 0) {
+        if (iter->items[iter->index] != NULL 
+                && iter->items[iter->index]->key != NULL
+                && iter->items[iter->index]->val != NULL) {
+            void *p = iter->items[iter->index]->val;
+            if (p == NULL) {
+                return Py_BuildValue("(s, O)", iter->items[iter->index]->key, Py_None);
+            }       
+            value = get_pointer(PyObject *, p);
+            PyObject *obj = Py_BuildValue("sO", iter->items[iter->index]->key, value);
+            iter->index++;
+            return obj;
+        } else {
+            iter->index++;
+        }
+    }
+    PyErr_SetNone(PyExc_StopIteration);
+    return NULL;
+}
+
+static PyTypeObject PyHashTableItems_type = {
+    PyVarObject_HEAD_INIT(NULL, 0)
+    "_iter()",                                          /* tp_name */
+    sizeof(PyHashTableItems),                           /* tp_basicsize */
+    0,                                                  /*  itemsize */
+    (destructor)0,                                      /* tp_dealloc */
+    (printfunc)0,                                       /* tp_print */
+    (getattrfunc)0,                                     /* tp_getattr */
+    (setattrfunc)0,                                     /* tp_setattr */
+#if PY_VERSION_HEX >= 0x03050000
+    (PyAsyncMethods *)0,                                /* tp_as_async */
+#elif PY_VERSION_HEX >= 0x03000000
+    (void *)0,                                          /* tp_reserved */
+#else
+    0,                                                  /* tp_compare */
+#endif
+    (reprfunc)0,                                        /* tp_repr */
+    (PyNumberMethods *)0,                               /* tp_as_number */
+    (PySequenceMethods *)0,                             /* tp_as_sequence */
+    (PyMappingMethods *)0,                              /* tp_as_mapping */
+    (hashfunc)0,                                        /* tp_hash */
+    (ternaryfunc)0,                                     /* tp_call */
+    (reprfunc)0,                                        /* tp_str */
+    (getattrofunc)0,                                    /* tp_getattro */
+    (setattrofunc)0,                                    /* tp_setattro */
+    (PyBufferProcs *)0,                                 /* tp_as_buffer */
+    Py_TPFLAGS_DEFAULT,                                 /* tp_flags */
+    0,                                                  /* tp_doc */
+    (traverseproc)0,                                    /* tp_traverse */
+    (inquiry)0,                                         /* tp_clear */
+    (richcmpfunc)0,                                     /* tp_richcompare */
+    0,                                                  /* tp_weaklistoffset */
+    (getiterfunc)PyHashTableItems_iter,                 /* tp_iter */
+    (iternextfunc)PyHashTableItems_iternext,            /* tp_iternext */
+    (struct PyMethodDef *)0,                            /* tp_methods */
+    (struct PyMemberDef *)0,                             /* tp_members */
+    0,                                                  /* tp_getset */
+    0,                                                  /* tp_base */
+    0,                                                  /* tp_dict */
+    (descrgetfunc)0,                                    /* tp_descr_get */
+    (descrsetfunc)0,                                    /* tp_descr_set */
+    0,                                                  /* tp_dictoffset */
+    (initproc)0,                                        /* tp_init */
+    0,                                                  /* tp_alloc */
+    (newfunc)0,                                         /* tp_new */
+    (freefunc)0,                                        /* tp_free */
+    (inquiry)0,                                         /* tb_is_gc */
+    0,                                                  /* tp_bases */
+    0,                                                  /* tp_mro */
+    0,                                                  /* tp_cache */
+    0,                                                  /* tp_subclasses */
+    0,                                                  /* tp_weaklist */
+    (destructor)0                                       /* tp_del */
+};
+
+static PyObject *
+PyHashTableItems_iter_init(PyObject *self) 
+{
+    PyHashTable *h_table = (PyHashTable *)self;
+    if (!h_table) {
+        PyErr_SetString(PyExc_RuntimeError, "The pointer on the hashtable is NULL.");
+        return NULL;
+    }
+    PyHashTableItems *iter = PyObject_New(PyHashTableItems, &PyHashTableItems_type);
+    if (iter == NULL) {
+        PyErr_SetString(PyExc_RuntimeError, "The pointer on the iterator is NULL.");
+        return NULL;
+    }
+    iter->items = h_table->table->items;
+    iter->index = 0;
+    iter->size = h_table->table->size;
+    return (PyObject *)iter;
+}
+
 static PyMemberDef PyHashTable_members[] = {
     {
         "size",
@@ -260,6 +376,12 @@ static PyMethodDef PyHashTable_methods[] = {
         "at",
         (PyCFunction)PyHashTable_at,
         METH_O,
+        "",
+    },
+    {
+        "items",
+        (PyCFunction)PyHashTableItems_iter_init,
+        METH_NOARGS,
         "",
     },
     {NULL}
@@ -340,6 +462,19 @@ PyMODINIT_FUNC PyInit_hashtable(void)
     if (!m) {
         return NULL;
     }
+    // Init iterator
+    if (PyType_Ready(&PyHashTableItems_type) > 0) {
+        return NULL;
+    }
+    PyObject *iterator = (PyObject *)&PyHashTableItems_type;
+    if (!iterator) {
+        return NULL;
+    }
+    Py_INCREF(iterator);
+    if (PyModule_AddObject(m, "Iterator", iterator) < 0) {
+        return NULL;
+    };
+    // Init hashtable class
     if (PyType_Ready(&PyHashTable_type) > 0) {
         return NULL;
     }
