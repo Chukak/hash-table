@@ -199,7 +199,6 @@ class TestsHashTable(unittest.TestCase):
         self.assertFalse(table.empty, msg="The table must be empty.")
 
         key, value = table.at(4567)
-        print(type(key), type(value))
         self.assertIs(type(key), type(""))
         self.assertIs(type(value), type(0))
 
@@ -232,6 +231,29 @@ class TestsHashTable(unittest.TestCase):
         key, value = table.at(in_)
         self.assertEqual(key, None)
         self.assertEqual(value, None)
+
+        del table
+
+    def test_nine(self):
+        table = Table(5000)
+        self.assertEqual(table.size, 5000, msg="The values are not the same.")
+        self.assertEqual(0, table.count, msg="Must be zero.")
+        self.assertTrue(table.empty, msg="The table must be empty.")
+
+        for n in range(1, 5000 + 1):
+            in_ = table.insert("key_" + str(n), n)
+            self.assertGreaterEqual(in_, 0)
+            self.assertLess(in_, table.size)
+
+        self.assertEqual(5000, table.count, msg="Must be zero.")
+        self.assertFalse(table.empty, msg="The table must be empty.")
+
+        index = 1
+        for item in table.items():
+            self.assertIs(type(item), type(tuple()))
+            self.assertEqual(item[0], "key_" + str(index))
+            self.assertEqual(item[1], index)
+            index += 1
 
         del table
 
