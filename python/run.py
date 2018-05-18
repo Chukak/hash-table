@@ -255,6 +255,19 @@ class TestsHashTable(unittest.TestCase):
             self.assertEqual(item[1], index)
             index += 1
 
+        for b in range(100, 500 + 1):
+            check = table.delete("key_" + str(b))
+            self.assertTrue(check)
+
+        index = 1
+        for item in table.items():
+            if index == 100:
+                index = 501
+            self.assertIs(type(item), type(tuple()))
+            self.assertEqual(item[0], "key_" + str(index))
+            self.assertEqual(item[1], index)
+            index += 1
+
         del table
 
 
