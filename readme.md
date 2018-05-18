@@ -209,6 +209,14 @@ Returns the item or ("", None), if item does not exists.
 key, value = table.find("key");
 ```
 
+### For loop
+In the `for` loop use `items()` method from the `Table` class. Returns an iterator with a tuple. 
+Tuple has the key and the value.
+```python
+for key, value in table.items(): 
+    ...
+```
+
 #### Delete table
 To delete a table call `del`. 
 ```python
