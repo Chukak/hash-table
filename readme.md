@@ -206,7 +206,7 @@ To find the item call `find` method from the `Table` class.
 Pass the key as the first parameter.
 Returns the item or ("", None), if item does not exists. 
 ```python
-key, value = table("key");
+key, value = table.find("key");
 ```
 
 #### Delete table
