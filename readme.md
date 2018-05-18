@@ -15,6 +15,17 @@ make -f LibraryMakefile
 ```
 
 ## How to use
+### Table structure
+#### `tb_hash_table` structure:
+* `table->size` - table size, type: `unsigned int`
+* `table->count` - number of elements in the table, type: `unsigned int`
+* `table->empty` - table is empty or not, type: `int`. Can be 1 or 0.
+* `table->items` - the pointer on a chain of pointers. type `tb_hash_table_item **`.
+
+#### `tb_hash_table_item` structure:
+* `item->key` - item key, type: `chat *`
+* `item->val` - the pointer to a value by key, type: `void *`
+
 ### Create table
 Create a table with a static size. Call `tb_create_hash_table` function. Pass the size as the first parameter.
 Returns a pointer on the table or NULL.
@@ -140,6 +151,20 @@ tb_delete_hash_table(table);
 ```
 
 ## Python
+### Table class
+#### Members:
+* `table.size` - table size
+* `table.count` - number of elements in the table
+* `table.empty` - Table is empty or not. Can be `True` or `False`.
+
+#### Methods:
+* `table.items()` - the iterator on elements.
+* `table.get()` - function, returns avalue by key.
+* `table.insert()` - function, inserts a value by key. Returns position.
+* `table.delete()` - function, deletes a value by key. Returns `True` if the deletion is successful, otherwise `False`.
+* `table.find()` - function, searches an item by key. Returns a tuple in the format `("key", value)` if the key is exists. If the key does is not exists, returns a tuple in the format `("", None)`.
+* `table.at()` - function, returns an item at the position. An tem is a tuple in the format `("key", value)`.
+
 ### How to compile
 This library can be compiled as a python module. For example, in Linux:
 ```bash
