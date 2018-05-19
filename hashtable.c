@@ -46,7 +46,7 @@ static void tb_delete_table_item(tb_hash_table_item *item) {
 }
 
 /* 
-    Static funtion, returns a new hash for strings.
+    A static funtion, returns a new hash for strings.
 */
 static int64_t get_hash(const char *key, uint32_t num) {
     uint64_t h = 0;
