@@ -19,7 +19,6 @@ if __name__ == "__main__":
         sys.argv.pop(index)
         paths = [sys.argv.pop(index)]
 
-    error = 0
     if not os.path.exists(paths[0]):
         print("Error: " + paths[0] + " does not exists.")
     else:
