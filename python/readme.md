@@ -1,7 +1,7 @@
 # Tests 
 
-## Compile module
-
+## Python 3+ version.
+### Compile module
 This library can be compiled as a python module. For example, in Linux:
 ```bash
 python setup.py built_ext --inplace
@@ -11,7 +11,7 @@ In python:
 from hashtable import Table
 ```
 
-## Run tests
+### Run tests
 Call `run.py` to run all the tests.
 
 ```python
