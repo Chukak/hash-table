@@ -2,11 +2,21 @@
 #include <python3.5/structmember.h>
 #include "../hashtable.h"
 
+/*
+    A macro for the the value from the pointer;
+ */
 #define get_pointer(type, pointer) ({ \
     __typeof__(type*) value = pointer; \
     *value; \
 })
 
+/*
+    The hash table struct.
+    `table` is a pointer to a table.
+    `size` is the size of a table.
+    `count` is the sum of the elements in a table.
+    `empty` is 1 or 0.
+ */
 typedef struct {
     PyObject_HEAD
     tb_hash_table *table;
@@ -15,6 +25,12 @@ typedef struct {
     uint32_t empty;
 } PyHashTable;
 
+/*
+    The hash table iterator struct.
+    `index` is a current index.
+    `size` is the size of a table.
+    `items` is an array of pointers.
+ */
 typedef struct {
     PyObject_HEAD
     uint32_t index;
@@ -22,10 +38,15 @@ typedef struct {
     tb_hash_table_item **items;
 } PyHashTableItems;
 
+// A module state.
 struct module_state {
     PyObject *error;
 };
 
+/*
+    A static function, creates a new hash table.
+    Returns a pointer to the table.
+ */
 static PyObject *
 PyHashTable_new(PyTypeObject *type, PyObject *args)
 {
@@ -39,6 +60,10 @@ PyHashTable_new(PyTypeObject *type, PyObject *args)
     return (PyObject *)hash_table;
 }
 
+/*
+    A static function, removes a hash table from memory.
+    Nothing to returns.
+ */
 static void 
 PyHashTable_dealloc(PyHashTable *self) 
 {
@@ -46,6 +71,10 @@ PyHashTable_dealloc(PyHashTable *self)
     self->ob_base.ob_type->tp_free((PyObject *)self);
 }
 
+/*
+    A static function, initializes a new hash table.
+    Returns 0 if success, otherwise -1.
+ */
 static int
 PyHashTable_init(PyHashTable *hash_table, PyObject *args)
 {
@@ -79,6 +108,10 @@ PyHashTable_init(PyHashTable *hash_table, PyObject *args)
     return 0;
 }
 
+/*
+    A static function, gets a value by key.
+    Creates a python object from this value and returns it.
+ */
 static PyObject *
 PyHashTable_get(PyObject *self, PyObject *args)
 {
@@ -102,6 +135,10 @@ PyHashTable_get(PyObject *self, PyObject *args)
     return Py_BuildValue("O", value);
 }
 
+/*
+    A static function, inserts a value by key into the table.
+    Returns the position.
+ */
 static PyObject *
 PyHashTable_insert(PyObject *self, PyObject *args)
 {
@@ -140,6 +177,10 @@ PyHashTable_insert(PyObject *self, PyObject *args)
     return Py_BuildValue("I", pos);
 }
 
+/*
+    A static function, removes a value by key.
+    Returns `True` if success, otherwise `False`.
+ */
 static PyObject *
 PyHashTable_delete(PyObject *self, PyObject *args)
 {
@@ -160,6 +201,10 @@ PyHashTable_delete(PyObject *self, PyObject *args)
     return Py_BuildValue("N", PyBool_FromLong(del));
 }
 
+/*
+    A static function, searches an element by key.
+    Returns a tuple in the format `(key, value)`.
+ */
 static PyObject *
 PyHashTable_find(PyObject *self, PyObject *args)
 {
@@ -185,6 +230,10 @@ PyHashTable_find(PyObject *self, PyObject *args)
     return Py_BuildValue("(s, O)", key, value);
 }
 
+/*
+    A static function, gets an element.
+    Returns a tuple in the format `(key, value)`.
+ */
 static PyObject *
 PyHashTable_at(PyObject *self, PyObject *args)
 {
@@ -213,6 +262,9 @@ PyHashTable_at(PyObject *self, PyObject *args)
     return Py_BuildValue("(s, O)", item->key, value);
 }
 
+/*
+    A static function, creates pointer to the iterator.
+ */
 static PyObject *
 PyHashTableItems_iter(PyObject *self) 
 {
@@ -220,6 +272,9 @@ PyHashTableItems_iter(PyObject *self)
     return self;
 }
 
+/*
+    A static function, returns a next element from iterator.
+ */
 static PyObject *
 PyHashTableItems_iternext(PyObject *self)
 {
@@ -229,6 +284,8 @@ PyHashTableItems_iternext(PyObject *self)
         PyErr_SetString(PyExc_RuntimeError, "The pointer on the hashtable is NULL.");
         return NULL;
     }
+    // get an element from the index
+    // if an element is deleted, increase the index and check again
     while (iter->index < iter->size && iter->index >= 0) {
         if (iter->items[iter->index] != NULL 
                 && iter->items[iter->index]->key != NULL
@@ -249,6 +306,9 @@ PyHashTableItems_iternext(PyObject *self)
     return NULL;
 }
 
+/*
+    The full definition of the iterator object of the hash table.
+ */
 static PyTypeObject PyHashTableItems_type = {
     PyVarObject_HEAD_INIT(NULL, 0)
     "_iter()",                                          /* tp_name */
@@ -284,7 +344,7 @@ static PyTypeObject PyHashTableItems_type = {
     (getiterfunc)PyHashTableItems_iter,                 /* tp_iter */
     (iternextfunc)PyHashTableItems_iternext,            /* tp_iternext */
     (struct PyMethodDef *)0,                            /* tp_methods */
-    (struct PyMemberDef *)0,                             /* tp_members */
+    (struct PyMemberDef *)0,                            /* tp_members */
     0,                                                  /* tp_getset */
     0,                                                  /* tp_base */
     0,                                                  /* tp_dict */
@@ -304,6 +364,10 @@ static PyTypeObject PyHashTableItems_type = {
     (destructor)0                                       /* tp_del */
 };
 
+/*
+    A static function, initializes a new iterator of the hash table.
+    Returns the iteterator if success, otherwise `NULL`.
+ */
 static PyObject *
 PyHashTableItems_iter_init(PyObject *self) 
 {
@@ -323,70 +387,90 @@ PyHashTableItems_iter_init(PyObject *self)
     return (PyObject *)iter;
 }
 
+/*
+    Members of the hash table class.
+    `size` - a size of the hash table.
+    `empty` - `True` if the hash table is empty, otherwise `False`.
+    `count` - number of elements in the hash table.
+ */
 static PyMemberDef PyHashTable_members[] = {
     {
         "size",
         T_INT,
         offsetof(PyHashTable, size),
         READONLY,
-        ""
+        "The size of the table."
     },
     {
         "empty",
         T_INT,
         offsetof(PyHashTable, empty),
         READONLY,
-        ""
+        "`True` if the table is empty, otherwise `False`."
     },
     {
         "count",
         T_INT,
         offsetof(PyHashTable, count),
         READONLY,
-        ""
+        "The count of elements in the table."
     }
 };
 
+/*
+    Methods of the hash table class.
+    `get` - gets a value by key from the hash table.
+    `insert` - inserts a value by key into the hash table.
+    `delete` - removes a value by key from the hash table.
+    `find` - searches an element by key in the hash table.
+    `at` - returns an element in this position.
+    `items` - returns the iterator of all the elements in the hash table.
+ */
 static PyMethodDef PyHashTable_methods[] = {
     {
         "get",
         (PyCFunction)PyHashTable_get,
         METH_O,
-        ""
+        "Returns a value by key."
     },
     {
         "insert",
         (PyCFunction)PyHashTable_insert,
         METH_VARARGS,
-        ""
+        "Inserts a value by key into the table. Returns the position."
     },
     {
         "delete",
         (PyCFunction)PyHashTable_delete,
         METH_O,
-        ""
+        "Delete a value by key from the table. "
+        "Returns `True` if the deletion is successful, otherwise `False`."
     },
     {
         "find",
         (PyCFunction)PyHashTable_find,
         METH_O,
-        "",
+        "Search the item in the table. "
+        "Returns a tuple in the format `(key, value)`.",
     },
     {
         "at",
         (PyCFunction)PyHashTable_at,
         METH_O,
-        "",
+        "Returns the element in this position.",
     },
     {
         "items",
         (PyCFunction)PyHashTableItems_iter_init,
         METH_NOARGS,
-        "",
+        "Returns the iterator of all elements.",
     },
     {NULL}
 };
 
+/*
+    The full definition of the hash table class.
+ */
 static PyTypeObject PyHashTable_type = {
     PyVarObject_HEAD_INIT(NULL, 0)
     "hashtable.Table",                                  /* tp_name */
@@ -442,10 +526,16 @@ static PyTypeObject PyHashTable_type = {
     (destructor)0                                       /* tp_del */
 };
 
+/*
+    Methods of the `hashtable` module.
+ */
 static PyMethodDef hashtable_methods[] = {
     {NULL}
 };
 
+/*
+    The definition of the `hashtable` module.
+ */
 static PyModuleDef py_module = {
     PyModuleDef_HEAD_INIT,
     "hashtable",
@@ -455,7 +545,9 @@ static PyModuleDef py_module = {
     NULL
 }; 
 
-
+/* 
+    The function initializes the `hashtable` module.
+ */
 PyMODINIT_FUNC PyInit_hashtable(void) 
 {
     PyObject *m = PyModule_Create(&py_module);
@@ -488,5 +580,3 @@ PyMODINIT_FUNC PyInit_hashtable(void)
     };
     return m;
 }
-
-
