@@ -1,5 +1,5 @@
-#include <python3.5/Python.h>
-#include <python3.5/structmember.h>
+#include <Python.h>
+#include <structmember.h>
 #include "../hashtable.h"
 
 /*
@@ -533,6 +533,7 @@ static PyMethodDef hashtable_methods[] = {
     {NULL}
 };
 
+#if PY_MAJOR_VERSION >= 3
 /*
     The definition of the `hashtable` module.
  */
@@ -546,11 +547,21 @@ static PyModuleDef py_module = {
 }; 
 
 /* 
-    The function initializes the `hashtable` module.
+    The function initializes the `hashtable` module. Python 3+ version.
  */
 PyMODINIT_FUNC PyInit_hashtable(void) 
+#else
+/*
+    The function initializes the `hashtable` module. Python 2 version.
+ */
+PyMODINIT_FUNC inithashtable(void)
+#endif
 {
+#if PY_MAJOR_VERSION >= 3
     PyObject *m = PyModule_Create(&py_module);
+#else
+    PyObject *m = Py_InitModule("hashtable", PyHashTable_methods);
+#endif
     if (!m) {
         return NULL;
     }
@@ -578,5 +589,7 @@ PyMODINIT_FUNC PyInit_hashtable(void)
     if (PyModule_AddObject(m, "Table", table_class) < 0) {
         return NULL;
     };
+#if PY_MAJOR_VERSION >= 3
     return m;
+#endif
 }
