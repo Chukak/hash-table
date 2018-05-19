@@ -44,7 +44,7 @@
 })
 
 /* 
-    A macro to get the value of random type. 
+    A macro to get the value of a random type. 
  */
 #define TB_CUSTOM_TYPE(type, pointer) ({ \
     __typeof__(type*) value = pointer; \
@@ -53,11 +53,12 @@
 
 
 /* 
-    hash table item struct.
-    key, val is pointers.
-    val is value by this key from table.
-    key must be string.
-    value must be poiter to object. 
+    
+    The hash table item struct.
+    `key`, `val` is pointers.
+    `val` is value by this `key` from table.
+    `key` must be a string.
+    `val` must be a pointer to an object. 
 */
 typedef struct {
     char *key;
@@ -65,12 +66,12 @@ typedef struct {
 } tb_hash_table_item;
 
 /* 
-    hash table struct.
-    size is size of table.
-    count is sum elements in table.
-    empty is 1 or 0. 
-    items if array of pointers, which point to has_table_items, which have value by key.
-    size and count must be unsigned int and more that 0.
+    The hash table struct.
+    `size` is the size of the table.
+    `count` is the sum of the elements in the table.
+    `empty` is 1 or 0.  
+    `items` is an array of pointers.
+    `size` and `count` must be unsigned int and greater that 0.
 */
 typedef struct {
     uint32_t size;
@@ -79,7 +80,7 @@ typedef struct {
     int empty;
 } tb_hash_table;
 
-// functions from hastable.c
+// The functions from `hastable.c`
 tb_hash_table_item *tb_get_item(tb_hash_table *table, const char *key);
 tb_hash_table_item *tb_item_at(tb_hash_table *table, uint32_t pos);
 tb_hash_table_item *tb_find_item(tb_hash_table *table, const char* key);
@@ -91,4 +92,3 @@ void tb_delete_hash_table(tb_hash_table *table);
 
 
 #endif
-
