@@ -2,6 +2,12 @@
 #include <structmember.h>
 #include "../hashtable.h"
 
+#if PY_MAJOR_VERSION >= 3
+#define INIT_ERROR return NULL
+#else
+#define INIT_ERROR return
+#endif
+
 /*
     A macro for the the value from the pointer;
  */
@@ -68,7 +74,11 @@ static void
 PyHashTable_dealloc(PyHashTable *self) 
 {
     tb_delete_hash_table(self->table);
+#if PY_MAJOR_VERSION >=3
     self->ob_base.ob_type->tp_free((PyObject *)self);
+#else
+    self->ob_type->tp_free((PyObject *)self);
+#endif
 }
 
 /*
@@ -560,34 +570,34 @@ PyMODINIT_FUNC inithashtable(void)
 #if PY_MAJOR_VERSION >= 3
     PyObject *m = PyModule_Create(&py_module);
 #else
-    PyObject *m = Py_InitModule("hashtable", PyHashTable_methods);
+    PyObject *m = Py_InitModule("hashtable", hashtable_methods);
 #endif
     if (!m) {
-        return NULL;
+        INIT_ERROR;
     }
     // Init iterator
     if (PyType_Ready(&PyHashTableItems_type) > 0) {
-        return NULL;
+        INIT_ERROR;
     }
     PyObject *iterator = (PyObject *)&PyHashTableItems_type;
     if (!iterator) {
-        return NULL;
+        INIT_ERROR;
     }
     Py_INCREF(iterator);
     if (PyModule_AddObject(m, "Iterator", iterator) < 0) {
-        return NULL;
+        INIT_ERROR;
     };
     // Init hashtable class
     if (PyType_Ready(&PyHashTable_type) > 0) {
-        return NULL;
+        INIT_ERROR;
     }
     PyObject *table_class = (PyObject *)&PyHashTable_type;
     if (!table_class) {
-        return NULL;
+        INIT_ERROR;
     }
     Py_INCREF(table_class);
     if (PyModule_AddObject(m, "Table", table_class) < 0) {
-        return NULL;
+        INIT_ERROR;
     };
 #if PY_MAJOR_VERSION >= 3
     return m;
