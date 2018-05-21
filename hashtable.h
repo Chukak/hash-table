@@ -3,6 +3,10 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif    
+
 /* 
     A macro to get an integer value. 
  */
@@ -84,11 +88,14 @@ typedef struct {
 tb_hash_table_item *tb_get_item(tb_hash_table *table, const char *key);
 tb_hash_table_item *tb_item_at(tb_hash_table *table, uint32_t pos);
 tb_hash_table_item *tb_find_item(tb_hash_table *table, const char* key);
-tb_hash_table *tb_create_hash_table(size_t size);
+tb_hash_table *tb_create_hash_table(uint32_t size);
 uint32_t tb_insert_item(tb_hash_table *table, const char *key, const void *val);
 void *tb_get_value(tb_hash_table *table, const char *key);
 int tb_delete_item(tb_hash_table *table, const char *key);
 void tb_delete_hash_table(tb_hash_table *table);
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif
