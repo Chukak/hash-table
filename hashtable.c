@@ -75,13 +75,13 @@ static uint32_t hash(const char *key, const uint32_t num, const int32_t try) {
     The function creates a new table in memory.
     Returns a pointer to the table.
 */
-tb_hash_table *tb_create_hash_table(size_t size) {
+tb_hash_table *tb_create_hash_table(uint32_t size) {
     if (size <= 0) {
         return (void *)0;
     }
     tb_hash_table *table = (tb_hash_table *)malloc(sizeof(tb_hash_table));
     // size_t is unsigned int 
-    table->size = (uint32_t)size;
+    table->size = size;
     table->count = 0;
     // returns a pointer to the allocated memory for all items
     table->items = (tb_hash_table_item **)malloc(size * sizeof(tb_hash_table_item));
