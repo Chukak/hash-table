@@ -87,7 +87,7 @@ type *value = tb_get_value(table, "key1");
 printf("%p", value); // print (nil)
 ```
 
-### Get an item 
+### Get items 
 To get the item call `tb_get_item` function. Pass the table as the first parameter, the key as the second.
 Returns the pointer to an item or NULL, if an item does not exists. 
 ```c
@@ -103,7 +103,7 @@ Returns the pointer to an item or NULL, if an item does not exists. If an item i
 tb_hash_table_item *item = tb_item_at(table, 1);
 ```
 
-### Find an item
+### Find items
 To find the item call `tb_find_item` function. 
 Pass the table as the first parameter, the key as the second.
 Returns the pointer to an item or NULL, if item does not exists. 
@@ -141,7 +141,7 @@ for (unsigned int i = 0; i < table->size + 10; i++) {
 ```
 
 ```c
-tb_hash_table_item *item = tb_item_at(table, index); returns NULL;
+tb_hash_table_item *item = tb_item_at(table, index); // returns NULL
 ```
 
 ### Delete table
@@ -231,7 +231,7 @@ Returns the item or ("", None), if an item does not exists. If an item is delete
 key, value = table.at(1);
 ```
 
-### Find an item
+### Find items
 To find the item call `find` method from the `Table` class. 
 Pass the key as the first parameter.
 Returns the item or ("", None), if item does not exists. 
@@ -269,7 +269,10 @@ printf("%i", a);
 * `TB_C` - returns a char from pointer(`char`).
 * `TB_STR` - returns string(`char *`).
 * `TB_CUSTOM_TYPE` - returns a custom type from the pointer. 
-
+A macros example:
+```c
+int a = TB_I(tb_get_value(table, "key"));
+```
 A custom type example:
 ```c
 Type t;
