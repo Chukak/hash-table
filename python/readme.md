@@ -1,6 +1,6 @@
 # Tests 
 
-## Compile module
+## How to compile module
 This library can be compiled as a python module. For example, in Linux:
 ```bash
 python setup.py built_ext --inplace
