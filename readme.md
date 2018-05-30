@@ -19,20 +19,20 @@ make -f LibraryMakefile
 #### `tb_hash_table` structure:
 * `table->size` - table size, type: `unsigned int`
 * `table->count` - number of elements in the table, type: `unsigned int`
-* `table->empty` - table is empty or not, type: `int`. Can be 1 or 0.
+* `table->empty` - the table is empty or not, type: `int`. Can be `1` or `0`.
 * `table->items` - the pointer on a chain of pointers. type `tb_hash_table_item **`.
 
 #### `tb_hash_table_item` structure:
-* `item->key` - item key, type: `chat *`
+* `item->key` - the name of the key, type: `chat *`
 * `item->val` - the pointer to a value by key, type: `void *`
 
 ### Create table
-Create a table with a static size. Call `tb_create_hash_table` function. Pass the size as the first parameter.
-Returns a pointer on the table or NULL.
+Create a table with a static size. Call the `tb_create_hash_table` function. Pass the size as the first parameter.
+Returns a pointer on the table or `NULL`.
 ```c
 tb_hash_table *table = tb_create_hash_table(size);
 ```
-If the size is zero, returns NULL.
+If the size is zero, returns `NULL`.
 ```c
 tb_hash_table *table = tb_create_hash_table(0);
 if (!table)
@@ -40,8 +40,8 @@ if (!table)
 ```
 
 ### Insert items
-Create the variable, that you want to put to the table. 
-Call `tb_insert_item` function with table, key and value. 
+Create the variable, which you want to put to the table. 
+Call the `tb_insert_item` function. 
 Pass the table as the first parameter, the name of the key as the second, and the address on your variable as the third.
 Returns the position of the item. The position is a `unsigned int` or `uint32_t` from `stdint.h`.
 ```c
@@ -52,7 +52,7 @@ unsigned int pos = tb_insert_item(table, "key2", &string);
 ```
 
 ### Change value
-Call `tb_insert_item` function with the name of the key, if you want to change the value by key.
+Call the `tb_insert_item` function with the name of the key, if you want to change the value by key.
 ```c
 int *value = tb_get_value(table, "key1");
 printf("%i", *value); // print 1
@@ -63,9 +63,9 @@ printf("%i", *new_value); // print 2
 ```
 
 ### Get value by key
-To get the value call `tb_get_value` function with table and key. 
+To get the value call the `tb_get_value` function. 
 Pass the table as the first parameter and the name of the key as the second.
-Returns a pointer on the value by key. If an item does not exists in the table, returns NULL;
+Returns a pointer on the value by key. If an item does not exists in the table, returns `NULL`;
 ```c
 int *value = tb_get_value(table, "key1");
 printf("%i", *value); // print 1
@@ -77,9 +77,9 @@ printf("%i", *string); // print "example"
 ```
 
 ### Delete items
-To delete the value by key call `tb_delete_item` funtion. 
+To delete the value by key call the `tb_delete_item` funtion. 
 Pass the table as the first parameter and the name of the key as the second.
-Returns 1 if the item is deleted, otherwise returns 0.
+Returns `1` if the item is deleted, otherwise returns `0`.
 ```c
 int check = tb_delete_item(table, "key1");
 
@@ -88,25 +88,25 @@ printf("%p", value); // print (nil)
 ```
 
 ### Get items 
-To get the item call `tb_get_item` function. Pass the table as the first parameter, the key as the second.
-Returns the pointer to an item or NULL, if an item does not exists. 
+To get the item call the `tb_get_item` function. Pass the table as the first parameter, the key as the second.
+Returns the pointer to an item or `NULL`, if an item does not exists. 
 ```c
 tb_hash_table_item *item = tb_get_item(table, "key");
 printf("%s", item->key);
 ```
 
 ### Get an item from the position
-To get the item from the position call `tb_item_at` function. 
+To get the item from the position call the `tb_item_at` function. 
 Pass the table as the first parameter, the position as the second.
-Returns the pointer to an item or NULL, if an item does not exists. If an item is deleted, returns pointer to the structure of `{NULL, NULL}`.
+Returns the pointer to an item or `NULL`, if an item does not exists. If an item is deleted, returns pointer to the structure of `{NULL, NULL}`.
 ```c
 tb_hash_table_item *item = tb_item_at(table, 1);
 ```
 
 ### Find items
-To find the item call `tb_find_item` function. 
+To find the item call the `tb_find_item` function. 
 Pass the table as the first parameter, the key as the second.
-Returns the pointer to an item or NULL, if item does not exists. 
+Returns the pointer to an item or `NULL`, if item does not exists. 
 ```c
 tb_hash_table_item *item = tb_find_item(table, "key");
 ```
@@ -145,7 +145,7 @@ tb_hash_table_item *item = tb_item_at(table, index); // returns NULL
 ```
 
 ### Delete table
-To delete table call `tb_delete_hash_table` function. Pass the table as the first parameter.
+To delete table call the `tb_delete_hash_table` function. Pass the table as the first parameter.
 ```c
 tb_delete_hash_table(table);
 ```
@@ -155,15 +155,15 @@ tb_delete_hash_table(table);
 #### Members:
 * `table.size` - table size
 * `table.count` - number of elements in the table
-* `table.empty` - Table is empty or not. Can be `True` or `False`.
+* `table.empty` - the table is empty or not. Can be `True` or `False`.
 
 #### Methods:
 * `table.items()` - the iterator on elements.
-* `table.get()` - function, returns avalue by key.
+* `table.get()` - function, returns a value by key.
 * `table.insert()` - function, inserts a value by key. Returns position.
-* `table.delete()` - function, deletes a value by key. Returns `True` if the deletion is successful, otherwise `False`.
+* `table.delete()` - function, removes a value by key. Returns `True` if the deletion is successful, otherwise `False`.
 * `table.find()` - function, searches an item by key. Returns a tuple in the format `("key", value)` if the key is exists. If the key does is not exists, returns a tuple in the format `("", None)`.
-* `table.at()` - function, returns an item at the position. An tem is a tuple in the format `("key", value)`.
+* `table.at()` - function, returns an item at the position in the format `("key", value)`.
 
 ### How to compile
 This library can be compiled as a python module. For example, in Linux:
@@ -196,7 +196,7 @@ pos = table.insert("key1", 45)
 ```
 
 #### Change value
-Call `insert` method from the `Table` class with the name of the key, if you want to change the value by key.
+Call the `insert` method from the `Table` class with the name of the key, if you want to change the value by key.
 Pass the name of the key as the first parameter, the value as the second. 
 ```python
 table.insert("key2", 45)
@@ -205,8 +205,8 @@ table.insert("key2", 64)
 print(table.get("key2")) #64
 ```
 #### Get value by key
-To get the value call `get` method fron the `Table` class with table and key. Returns the value.
-Pass the name of the key as the first parameter. Returns the value by key. If an item does not exists in the table, returns None;
+To get the value call the `get` method fron the `Table` class with table and key. Returns the value.
+Pass the name of the key as the first parameter. Returns a value by key. If an item does not exists in the table, returns `None`;
 
 ```python
 a = table.get("key2")
@@ -214,7 +214,7 @@ print(a)
 ```
 
 #### Delete items
-To delete value by key call `delete` method from the `Table` class. Returns `True` if the deletion is successful otherwise `False`. Pass the name of the key as the first parameter.
+To delete value by key call the `delete` method from the `Table` class. Returns `True` if the deletion is successful otherwise `False`. Pass the name of the key as the first parameter.
 ```python
 deletion = table.delete("key1");
 if deletion: 
@@ -224,24 +224,24 @@ print(a) # None
 ```
 
 #### Get an item from the position
-To get the item from the position call `at` method from the `Table` class. 
+To get the item from the position call the `at` method from the `Table` class. 
 Pass the the position as the first parameter.
-Returns the item or ("", None), if an item does not exists. If an item is deleted, returns the tuple of `(None, None)`.
+Returns the item or `("", None)`, if an item does not exists. If an item is deleted, returns the tuple of `(None, None)`.
 ```python
 key, value = table.at(1);
 ```
 
 ### Find items
-To find the item call `find` method from the `Table` class. 
+To find the item call the `find` method from the `Table` class. 
 Pass the key as the first parameter.
-Returns the item or ("", None), if item does not exists. 
+Returns the item or `("", None)`, if item does not exists. 
 ```python
 key, value = table.find("key");
 ```
 
 ### For loop
-In the `for` loop use `items()` method from the `Table` class. Returns an iterator with a tuple. 
-Tuple has the key and the value.
+In the `for` loop use the `items()` method from the `Table` class. Returns an iterator with a tuples. 
+Tuple has a key and a value.
 ```python
 for key, value in table.items(): 
     ...
@@ -266,7 +266,7 @@ printf("%i", a);
 * `TB_I` - returns an integer value from the pointer (`int`).
 * `TB_F` - returns a float value from the pointer(`float`).
 * `TB_D` - returns a double value from the pointer(`double`).
-* `TB_C` - returns a char from pointer(`char`).
+* `TB_C` - returns a character from pointer(`char`).
 * `TB_STR` - returns string(`char *`).
 * `TB_CUSTOM_TYPE` - returns a custom type from the pointer. 
 A macros example:
