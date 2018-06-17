@@ -1,27 +1,41 @@
-# compiler
+
 CC = gcc
-# flags
-CFLAGS = -g -Wall -D_DEFAULT_SOURCE -std=c11 -Werror
+BASICOPTS = -g
+CFLAGS = -Werror -Wall -g -std=c11 -D_DEFAULT_SOURCE
 
-# name objects
-OBJ = main.o hashtable.o example.o
 
-.PHONY: all clean hashtable
+TARGETDIR_hashtable.so=hashtable
 
-all: hashtable
 
-main.o: main.c 
-	$(CC) $(CFLAGS) -c -o main.o main.c 
+all: $(TARGETDIR_hashtable.so)/hashtable.so copy end
 
-hashtable.o: hashtable.c 
-	$(CC) $(CFLAGS) -c -o hashtable.o hashtable.c 
+CFLAGS_hashtable.so = 
+OBJS_hashtable.so =  \
+	$(TARGETDIR_hashtable.so)/hashtable.o
 
-example.o: example.c
-	$(CC) $(CFLAGS) -c -o example.o example.c
 
-hashtable: $(OBJ)
-	$(CC) -o hashtable main.o hashtable.o example.o -lm
 
-clean: 
-	rm -rf hashtable *.o
+SHAREDLIB_FLAGS_hashtable.so = -shared 
+$(TARGETDIR_hashtable.so)/hashtable.so: $(TARGETDIR_hashtable.so) $(OBJS_hashtable.so) 
+	$(CC) $(CFLAGS) $(CFLAGS_hashtable.so) -o $@ $(OBJS_hashtable.so) $(SHAREDLIB_FLAGS_hashtable.so)
 
+
+$(TARGETDIR_hashtable.so)/hashtable.o: $(TARGETDIR_hashtable.so) hashtable.c
+	$(CC) $(CFLAGS) -c $(CFLAGS_hashtable.so) $(CPPFLAGS_hashtable.so) -o $@ hashtable.c
+
+clean:
+	rm -f \
+		$(TARGETDIR_hashtable.so)/hashtable.so \
+		$(TARGETDIR_hashtable.so)/hashtable.o 
+	rm -f -r $(TARGETDIR_hashtable.so)
+
+copy:
+	cp hashtable.h $(TARGETDIR_hashtable.so)/
+	
+end:
+	rm -f $(TARGETDIR_hashtable.so)/hashtable.o	
+
+$(TARGETDIR_hashtable.so):
+	mkdir -p $(TARGETDIR_hashtable.so)
+
+.KEEP_STATE:
