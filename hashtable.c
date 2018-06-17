@@ -5,7 +5,7 @@
 #include <string.h>
 #include <math.h>
 #include <signal.h>
-#include <stdio.h>
+
 #include "hashtable.h"
 
 
