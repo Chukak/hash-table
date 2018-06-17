@@ -9,7 +9,8 @@ class TestsHashTable(unittest.TestCase):
         self.assertEqual(0, table.count, msg="Must be zero.")
         self.assertTrue(table.empty, msg="The table must be empty.")
         del table
-
+        
+        # uncomment it if you want to check seg fault.
         #try:
         #    table = Table(0)
         #except Exception as e:
@@ -247,26 +248,23 @@ class TestsHashTable(unittest.TestCase):
 
         self.assertEqual(5000, table.count, msg="Must be zero.")
         self.assertFalse(table.empty, msg="The table must be empty.")
-
-        index = 1
+        
+        keys = ["key_" + str(i) for i in range(1, 5000 +1)]
+        
         for item in table.items():
             self.assertIs(type(item), type(tuple()))
-            self.assertEqual(item[0], "key_" + str(index))
-            self.assertEqual(item[1], index)
-            index += 1
+            self.assertIn(item[0], keys)
+            self.assertEqual(item[1], int(item[0][4:]))
 
         for b in range(100, 500 + 1):
             check = table.delete("key_" + str(b))
             self.assertTrue(check)
 
-        index = 1
+        keys = ["key_" + str(i) for i in range(100, 500)]
         for item in table.items():
-            if index == 100:
-                index = 501
             self.assertIs(type(item), type(tuple()))
-            self.assertEqual(item[0], "key_" + str(index))
-            self.assertEqual(item[1], index)
-            index += 1
+            self.assertNotIn(item[0], keys)
+            self.assertEqual(item[1], int(item[0][4:]))
 
         del table
 
