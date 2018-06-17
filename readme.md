@@ -5,13 +5,9 @@ Clone this repository
 ```bash
 git clone https://github.com/Chukak/hash-table.git
 ```
-Run make
+Create the `.so` library:
 ```bash
 make -f Makefile
-```
-If you need the `.so` library:
-```bash
-make -f LibraryMakefile
 ```
 
 ## How to use
