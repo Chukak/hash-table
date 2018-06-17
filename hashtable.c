@@ -111,13 +111,23 @@ tb_hash_table *tb_create_hash_table(uint32_t size) {
  */
 tb_hash_table_item *tb_find_item(tb_hash_table * table, const char *key) {
     if (table->size) {
-        for (uint32_t index = 0; index < table->size - 1; index++) {
-            tb_hash_table_item *item = table->items[index];
-            if (item != NULL && item != &DELETED) {
+        uint32_t index, try;
+        index = hash(key, table->size, 0);
+        try = 1;
+        tb_hash_table_item *item = table->items[index];
+        while (item != NULL) {
+            // check if an item is not deleted ( if an item exists )
+            if (item != &DELETED) {
                 if (strcmp(item->key, key) == 0) {
                     return item;
                 }
             }
+            // get a new hash
+            index = hash(key, table->size, try);
+            // get a new current item
+            item = table->items[index];
+            // +1 attempts
+            try++;
         }
         return NULL;
     }
