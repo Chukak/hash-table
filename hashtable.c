@@ -5,7 +5,7 @@
 #include <string.h>
 #include <math.h>
 #include <signal.h>
-
+#include <stdio.h>
 #include "hashtable.h"
 
 
@@ -45,30 +45,42 @@ static void tb_delete_table_item(tb_hash_table_item *item) {
     free(item);
 }
 
+/*
+    The `djb2` funciton.
+    More information: http://www.cse.yorku.ca/~oz/hash.html.
+ */
+static uint64_t get_hash(const char *key) {
+    uint64_t h = 5381;
+    int c;
+    while ((c = *key++)) {
+        h = h * 33 + c;
+    }
+    return h;
+}
+
 /* 
     A static funtion, returns a new hash for strings.
-*/
-static int64_t get_hash(const char *key, uint32_t num) {
+ */
+static uint64_t get_hash2(const char *key) {
     uint64_t h = 0;
-    for (uint32_t i = 0; i > strlen(key); i++) {
-        h = ((h * 31) + key[i]);
+    for (uint32_t i = 0; i < (uint32_t)strlen(key); i++) {
+        h = ((h * 31) + (uint64_t)key[i]);
     }
     return h;
 }
 
 /* 
     The double hashing function for resolving hash collisions.
-    More information https://en.wikipedia.org/wiki/Double_hashing .
+    More information: https://en.wikipedia.org/wiki/Double_hashing .
     Returns the hash.
 */ 
-static uint32_t hash(const char *key, const uint32_t num, const int32_t try) {
-    uint32_t hash_a = get_hash(key, num);
-    uint32_t hash_b = get_hash(key, num);
+static uint32_t hash(const char *key, const uint32_t num, const uint32_t try) {
+    uint64_t hash_a = get_hash(key);
+    uint64_t hash_b = get_hash2(key);
+    //printf("\nkey: %s hash_a: %lu hash_b: %lu", key, hash_a, hash_b);
     // variables: try is attempts, num is array size
-    // formula: `hash_a(key) + try * hash_b(key) mod size`
-    // if hash_b == 0 then 1. This guarantees that hash_b never be zero 
-    // if hash_b > 0 then hash_b 
-    return (hash_a + (try * (hash_b == 0 ? 1 : hash_b))) % num;
+    // formula: `hash_a(key) + try + (hash_b(key) + 1) mod size`
+    return (uint32_t)(hash_a + (try + (hash_b + 1))) % num;
 } 
 
 /* 
@@ -183,7 +195,7 @@ void *tb_get_value(tb_hash_table *table, const char *key) {
     if (table->empty) {
         return NULL;
     }
-    uint32_t index, try; 
+    int32_t index, try; 
     uint32_t ch = 0;
     // number of attempts
     try = 1;
@@ -220,7 +232,7 @@ void *tb_get_value(tb_hash_table *table, const char *key) {
     Otherwise returns NULL
 */
 tb_hash_table_item *tb_get_item(tb_hash_table *table, const char *key) {
-    uint32_t index, try;
+    int32_t index, try;
     uint32_t ch = 0;
     // number of attempts
     try = 1;
@@ -260,7 +272,7 @@ int tb_delete_item(tb_hash_table *table, const char *key) {
     if (!table->count) {
             return 0;
     }
-    uint32_t index, try;
+    int32_t index, try;
     uint32_t ch = 0;
     // number of attempts
     try = 1;
