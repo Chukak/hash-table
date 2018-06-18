@@ -19,7 +19,7 @@ tests.o: tests.c
 	$(CC) $(CFLAGS) -c -o tests.o tests.c
 
 hashtable: $(OBJ)
-	$(CC) -o hashtable main.o hashtable.o tests.o -lm
+	$(CC) -o tests main.o hashtable.o tests.o -lm
 
 clean: 
 	rm -rf hashtable *.o
