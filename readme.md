@@ -210,7 +210,7 @@ print(a)
 ```
 
 #### Delete items
-To delete value by key call the `delete` method from the `Table` class. Returns `True` if the deletion is successful otherwise `False`. Pass the name of the key as the first parameter.
+To delete a value by key call the `delete` method from the `Table` class. Returns `True` if the deletion is successful otherwise `False`. Pass the name of the key as the first parameter.
 ```python
 deletion = table.delete("key1");
 if deletion: 
@@ -236,15 +236,15 @@ key, value = table.find("key");
 ```
 
 ### For loop
-In the `for` loop use the `items()` method from the `Table` class. Returns an iterator with a tuples. 
-Tuple has a key and a value.
+In the `for` loop use the `items()` method from the `Table` class. Returns an iterator with tuples. 
+Tuple has a key and value.
 ```python
 for key, value in table.items(): 
     ...
 ```
 
 #### Delete table
-To delete a table call `del`. 
+To delete the table call `del`. 
 ```python
 del table
 ```
