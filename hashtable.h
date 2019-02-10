@@ -77,10 +77,9 @@ extern tb_hash_table_item *EMPTY_ITEM;
 
 // The functions from `hastable.c`
 tb_hash_table_item *tb_get_item(const tb_hash_table * const table, const char* key);
-tb_hash_table_item *tb_item_at(const tb_hash_table * const table, uint32_t pos);
 tb_hash_table_item *tb_find_item(const tb_hash_table * const table, const char* key);
 tb_hash_table *tb_create_hash_table(uint32_t size);
-int64_t tb_insert_item(tb_hash_table *table, const char* key, const void* val);
+void tb_insert_item(tb_hash_table *table, const char* key, const void* val);
 void *tb_get_value(const tb_hash_table * const table, const char* key);
 int tb_delete_item(tb_hash_table *table, const char* key);
 void tb_delete_hash_table(tb_hash_table *table);

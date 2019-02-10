@@ -141,30 +141,11 @@ tb_hash_table_item *tb_find_item(const tb_hash_table * const table, const char *
     return NULL;
 }
 
-/*
-    Returns the item in the position. If the item is EMPTY_ITEM returns `{NULL, NULL}`.
-    Otherwise returns NULL.
- */
-tb_hash_table_item *tb_item_at(const tb_hash_table * const table, uint32_t pos) {
-    if (pos <= table->size) {
-        tb_hash_table_item *item = table->items[pos];
-        if (item != EMPTY_ITEM) {
-            return item;
-        }
-    } else if (pos >= table->size && pos <= table->allocated) {
-        tb_hash_table_item *item = table->items[pos];
-        if (item != EMPTY_ITEM) {
-            return item;
-        }
-    }
-    return EMPTY_ITEM;
-}
-
 /* 
     The function inserts a value by key into the table.
     Returns the position of the item.
 */
-int64_t tb_insert_item(tb_hash_table *table, const char *key, const void *val) {
+void tb_insert_item(tb_hash_table *table, const char *key, const void *val) {
     // get a new item
     tb_hash_table_item *new_item = tb_new_table_item(key, val);
     // get hash
@@ -181,11 +162,11 @@ int64_t tb_insert_item(tb_hash_table *table, const char *key, const void *val) {
                 // delete a current value by key, set a new value by key
                 tb_delete_table_item(current_item);
                 table->items[index] = new_item;
-                return index;
+                return;
             }
             if (table->size == table->count) {
                 printf("Error: hastable is full! Skip insert operation!");
-                return -1;
+                return;
             }
         // if an item is EMPTY_ITEM, stop cycle
         } else {
@@ -202,7 +183,7 @@ int64_t tb_insert_item(tb_hash_table *table, const char *key, const void *val) {
     table->items[index] = new_item;
     ++table->count;
     table->empty = 0;
-    return index;
+    return;
 }
 
 /* 

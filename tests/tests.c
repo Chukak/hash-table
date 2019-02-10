@@ -97,9 +97,12 @@ TEST(test_insert_table) {
     EXPECT_EQ(table->size, 100000);
     EXPECT_EQ(table->count, 0);
     char *key = malloc(sizeof(char *));
-    for (int i = 0; i < 100000; ++i) {
+    uint32_t saved_count = 0;
+    ++saved_count;
+    for (int i = 0; i < 100000; ++i, ++saved_count) {
         sprintf(key, "key_%i", i);
-        EXPECT_TRUE(tb_insert_item(table, key, &i) != -1);
+        tb_insert_item(table, key, &i);
+        EXPECT_EQ(table->count, saved_count);
     }
     clock_t end = clock();
     double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
@@ -115,12 +118,12 @@ TEST(test_get_value_from_table) {
     EXPECT_EQ(table->size, 100000);
     EXPECT_EQ(table->count, 0);
     char *key = malloc(sizeof(char *));
-    int positions[100000];
-    for (int i = 0; i < 100000; ++i) {
+    uint32_t saved_count = 0;
+    ++saved_count;
+    for (int i = 0; i < 100000; ++i, ++saved_count) {
         sprintf(key, "key_%i", i);
-        int pos = (int)tb_insert_item(table, key, &i);
-        EXPECT_TRUE(pos != -1);
-        positions[i] = pos;
+        tb_insert_item(table, key, &i);
+        EXPECT_EQ(table->count, saved_count);
     }
     EXPECT_FALSE(table->empty);
     EXPECT_EQ(table->count, 100000);
@@ -138,23 +141,12 @@ TEST(test_get_value_from_table) {
     clock_t begin2 = clock();
     for (int i = 0; i < 100000; ++i) {
         sprintf(key, "key_%i", i);
-        tb_hash_table_item *item = tb_item_at(table, (uint32_t)positions[i]);
-        EXPECT_STRINGS_EQ(item->key, key);
-        EXPECT_TRUE(GET_INT(item->val) == i);
-    }
-    clock_t end2 = clock();
-    double time_spent2 = (double)(end2 - begin2) / CLOCKS_PER_SEC;
-    printf("'tb_item_at' function perfomance of table - 100000 items: %f ms \n", time_spent2);
-
-    clock_t begin3 = clock();
-    for (int i = 0; i < 100000; ++i) {
-        sprintf(key, "key_%i", i);
         void * value = tb_get_value(table, key);
         EXPECT_TRUE(GET_INT(value) == i);
     }
-    clock_t end3 = clock();
-    double time_spent3 = (double)(end3 - begin3) / CLOCKS_PER_SEC;
-    printf("'tb_get_value' function perfomance of table - 100000 items: %f ms \n", time_spent3);
+    clock_t end2 = clock();
+    double time_spent2 = (double)(end2 - begin2) / CLOCKS_PER_SEC;
+    printf("'tb_get_value' function perfomance of table - 100000 items: %f ms \n", time_spent2);
     tb_delete_hash_table(table);
 }
 
@@ -164,37 +156,32 @@ TEST(test_delete_value_from_table) {
     EXPECT_EQ(table->size, 100000);
     EXPECT_EQ(table->count, 0);
     char *key = malloc(sizeof(char *));
-    int positions[100000];
-    for (int i = 0; i < 100000; ++i) {
+    uint32_t saved_count = 0;
+    ++saved_count;
+    for (int i = 0; i < 100000; ++i, ++saved_count) {
         sprintf(key, "key_%i", i);
-        int pos = (int)tb_insert_item(table, key, &i);
-        EXPECT_TRUE(pos != -1);
-        positions[i] = pos;
+        tb_insert_item(table, key, &i);
+        EXPECT_EQ(table->count, saved_count);
     }
     EXPECT_FALSE(table->empty);
     EXPECT_EQ(table->count, 100000);
-    uint32_t saved_count = table->count;
-    --saved_count;
+    uint32_t saved_count2 = table->count;
+    --saved_count2;
     clock_t begin = clock();
-    for (int i = 0; i < 100000; ++i, --saved_count) {
+    for (int i = 0; i < 100000; ++i, --saved_count2) {
         sprintf(key, "key_%i", i);
         tb_hash_table_item *item = tb_get_item(table, key);
         EXPECT_STRINGS_EQ(item->key, key);
         EXPECT_TRUE(GET_INT(item->val) == i);
         void * value = tb_get_value(table, key);
         EXPECT_TRUE(GET_INT(value) == i);
-        item = tb_item_at(table, (uint32_t)positions[i]);
-        EXPECT_STRINGS_EQ(item->key, key);
-        EXPECT_TRUE(GET_INT(item->val) == i);
         int del = tb_delete_item(table, key);
         ACTUAL_TRUE(del);
         item = tb_get_item(table, key);
         EXPECT_TRUE(item == NULL);
         value = tb_get_value(table, key);
         EXPECT_TRUE(value == NULL);
-        item = tb_item_at(table, (uint32_t)positions[i]);
-        EXPECT_TRUE(item == EMPTY_ITEM);
-        EXPECT_EQ(table->count, saved_count);
+        EXPECT_EQ(table->count, saved_count2);
     }
     clock_t end = clock();
     double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
