@@ -7,14 +7,15 @@ git clone https://github.com/Chukak/hash-table.git
 ```
 Create the `.so` library:
 ```bash
-make -f Makefile
+cmake ..
 ```
 
 ## How to use
 ### Table structure
 #### `tb_hash_table` structure:
-* `table->size` - table size, type: `unsigned int`
-* `table->count` - number of elements in the table, type: `unsigned int`
+* `table->size` - table size, type: `unsigned int`.
+* `table->count` - number of elements in the table, type: `unsigned int`.
+* `table.allocated` - number of bytes which was allocatef for the table. (size * 1.25)
 * `table->empty` - the table is empty or not, type: `int`. Can be `1` or `0`.
 * `table->items` - the pointer on a chain of pointers. type `tb_hash_table_item **`.
 
@@ -39,12 +40,12 @@ if (!table)
 Create the variable, which you want to put to the table. 
 Call the `tb_insert_item` function. 
 Pass the table as the first parameter, the name of the key as the second, and the address on your variable as the third.
-Returns the position of the item. The position is a `unsigned int` or `uint32_t` from `stdint.h`.
+If the table is full, write a warning in the console and nothing to do.
 ```c
 int a = 1;
-unsigned int pos = tb_insert_item(table, "key1", &a);
+tb_insert_item(table, "key1", &a);
 char *string = "example";
-unsigned int pos = tb_insert_item(table, "key2", &string);
+tb_insert_item(table, "key2", &string);
 ```
 
 ### Change value
@@ -91,14 +92,6 @@ tb_hash_table_item *item = tb_get_item(table, "key");
 printf("%s", item->key);
 ```
 
-### Get an item from the position
-To get the item from the position call the `tb_item_at` function. 
-Pass the table as the first parameter, the position as the second.
-Returns the pointer to an item or `NULL`, if an item does not exists. If an item is deleted, returns pointer to the structure of `{NULL, NULL}`.
-```c
-tb_hash_table_item *item = tb_item_at(table, 1);
-```
-
 ### Find items
 To find the item call the `tb_find_item` function. 
 Pass the table as the first parameter, the key as the second.
@@ -110,35 +103,32 @@ tb_hash_table_item *item = tb_find_item(table, "key");
 ### For loop
 In the `for` loop, you must check the pointer to the item. 
 ```c
-for (unsigned int i = 0; i < table->size; i++) {
+for (unsigned int i = 0; i < table->allocated; i++) {
     tb_hash_table_item *item = table.items[i];
-    if (item != NULL) {
+    if (item != EMPTY_ITEM) {
       ...
     }
 }
 ```
 If the index is out of range `0` to `table->size`:
 ```c
-for (unsigned int i = 0; i < table->size + 10; i++) {
-    unsigned int pos = tb_insert_item(table, "key"); // raises seg fault
+for (unsigned int i = 0; i < table->allocated + 10; i++) {
+    tb_insert_item(table, "key");  // warning in the console
 }
 ```
 
 ```c
-for (unsigned int i = 0; i < table->size + 10; i++) {
+for (unsigned int i = 0; i < table->allocated + 10; i++) {
     void *p = tb_get_value(table, "key"); // returns NULL 
 }
 ```
 
 ```c
-for (unsigned int i = 0; i < table->size + 10; i++) {
+for (unsigned int i = 0; i < table->allocated + 10; i++) {
     int delete = tb_delete_item(table, "key"); // returns 0 
 }
 ```
 
-```c
-tb_hash_table_item *item = tb_item_at(table, index); // returns NULL
-```
 
 ### Delete table
 To delete table call the `tb_delete_hash_table` function. Pass the table as the first parameter.
@@ -159,7 +149,6 @@ tb_delete_hash_table(table);
 * `table.insert()` - function, inserts a value by key. Returns position.
 * `table.delete()` - function, removes a value by key. Returns `True` if the deletion is successful, otherwise `False`.
 * `table.find()` - function, searches an item by key. Returns a tuple in the format `("key", value)` if the key is exists. If the key does is not exists, returns a tuple in the format `("", None)`.
-* `table.at()` - function, returns an item at the position in the format `("key", value)`.
 
 ### How to compile
 This library can be compiled as a python module. For example, in Linux:
@@ -169,7 +158,7 @@ python setup.py built_ext --inplace
 ```
 If you need a special path for the `Python.h` and `structmember.h` headers:
 ```bash
-python setup.py build_ext --inplace --include-paths /usr/include/python3.5
+python setup.py build_ext --inplace --include-paths /usr/include/python3.6
 ```
 
 In python:
@@ -188,7 +177,7 @@ table = Table(size);
 Call the `insert` method from the `Table` class. Pass the name of the key as the first parameter, the value as the second.
 Returns the position of the item.
 ```python
-pos = table.insert("key1", 45)
+table.insert("key1", 45)
 ```
 
 #### Change value
@@ -219,14 +208,6 @@ a = table.get("key1")
 print(a) # None
 ```
 
-#### Get an item from the position
-To get the item from the position call the `at` method from the `Table` class. 
-Pass the the position as the first parameter.
-Returns the item or `("", None)`, if an item does not exists. If an item is deleted, returns the tuple of `(None, None)`.
-```python
-key, value = table.at(1);
-```
-
 ### Find items
 To find the item call the `find` method from the `Table` class. 
 Pass the key as the first parameter.
@@ -244,7 +225,7 @@ for key, value in table.items():
 ```
 
 #### Delete table
-To delete the table call `del`. 
+To delete the table call `del`. This is an optional action.
 ```python
 del table
 ```
@@ -255,25 +236,25 @@ For testing check this [page](https://github.com/Chukak/hash-table/blob/master/p
 ### Macros (Only C/C++)
 You can be use macros to get value from `void *`. For example:
 ```c
-int a = TB_I(tb_get_value(table, "key"));
+int a = GET_INT(tb_get_value(table, "key"));
 printf("%i", a);
 ```
 #### Macros
-* `TB_I` - returns an integer value from the pointer (`int`).
-* `TB_F` - returns a float value from the pointer(`float`).
-* `TB_D` - returns a double value from the pointer(`double`).
-* `TB_C` - returns a character from pointer(`char`).
-* `TB_STR` - returns string(`char *`).
-* `TB_CUSTOM_TYPE` - returns a custom type from the pointer. 
+* `GET_INT` - returns an integer value from the pointer (`int`).
+* `GET_FLOAT` - returns a float value from the pointer(`float`).
+* `GET_DOUBLE` - returns a double value from the pointer(`double`).
+* `GET_CHAR` - returns a character from pointer(`char`).
+* `GET_STRING` - returns string(`char *`).
+* `GET_CUSTOM_TYPE` - returns a custom type from the pointer (Using this macro can lead to undefined behavior).
 A macros example:
 ```c
-int a = TB_I(tb_get_value(table, "key"));
+int a = GET_INT(tb_get_value(table, "key"));
 ```
 A custom type example:
 ```c
 Type t;
 tb_insert_item(table, "key", &t);
-Type t = TB_CUSTOM_TYPE(tb_get_value(table, "key"));
+Type t = GET_CUSTOM_TYPE(tb_get_value(table, "key"));
 ```
 
 

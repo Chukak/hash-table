@@ -10,55 +10,39 @@ extern "C" {
 /* 
     A macro to get an integer value. 
  */
-#define TB_I(pointer) ({ \
-    int *result = pointer; \
-    *result; \
-})
+#define GET_INT(pointer) *((int *)pointer)
 
 /* 
     A macro to get a float value. 
  */
-#define TB_F(pointer) ({ \
-    float *result = pointer; \
-    *result; \
-})    
+#define GET_FLOAT(pointer) *((float *)pointer)
 
 /* 
     A macro to get a double value. 
  */
-#define TB_D(pointer) ({ \
-    double *result = pointer; \
-    *result; \
-})
+#define GET_DOUBLE(pointer) *((double *)pointer)
 
 /* 
     A macro to get a char. 
  */
-#define TB_C(pointer) ({ \
-    char *result = pointer; \
-    *result; \
-})
+#define GET_CHAR(pointer) *((char *)pointer)
 
 /* 
     A macro to get a string. 
  */
-#define TB_STR(pointer) ({ \
-    char **result = pointer; \
-    *result; \
-})
+#define GET_STR(pointer) *((char **)pointer)
 
 /* 
     A macro to get the value of a random type. 
  */
-#define TB_CUSTOM_TYPE(type, pointer) ({ \
+#define GET_CUSTOM_TYPE(type, pointer) ({ \
     __typeof__(type*) value = pointer; \
     *value; \
 })
 
 
-/* 
-    
-    The hash table item struct.
+/*   
+    The hashtable item struct.
     `key`, `val` is pointers.
     `val` is value by this `key` from table.
     `key` must be a string.
@@ -78,20 +62,26 @@ typedef struct {
     `size` and `count` must be unsigned int and greater that 0.
 */
 typedef struct {
+    uint32_t allocated;
     uint32_t size;
     uint32_t count;
     tb_hash_table_item **items;
     int empty;
 } tb_hash_table;
 
+/*
+    A variable EMPTY_ITEM, for check all EMPTY_ITEM items in table.
+    Key and val must be null.
+*/
+extern tb_hash_table_item *EMPTY_ITEM;
+
 // The functions from `hastable.c`
-tb_hash_table_item *tb_get_item(tb_hash_table *table, const char *key);
-tb_hash_table_item *tb_item_at(tb_hash_table *table, uint32_t pos);
-tb_hash_table_item *tb_find_item(tb_hash_table *table, const char* key);
+tb_hash_table_item *tb_get_item(const tb_hash_table * const table, const char* key);
+tb_hash_table_item *tb_find_item(const tb_hash_table * const table, const char* key);
 tb_hash_table *tb_create_hash_table(uint32_t size);
-uint32_t tb_insert_item(tb_hash_table *table, const char *key, const void *val);
-void *tb_get_value(tb_hash_table *table, const char *key);
-int tb_delete_item(tb_hash_table *table, const char *key);
+void tb_insert_item(tb_hash_table *table, const char* key, const void* val);
+void *tb_get_value(const tb_hash_table * const table, const char* key);
+int tb_delete_item(tb_hash_table *table, const char* key);
 void tb_delete_hash_table(tb_hash_table *table);
 
 #ifdef __cplusplus

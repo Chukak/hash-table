@@ -1,7 +1,11 @@
 import sys
 import os
-from distutils.core import setup, Extension
-
+try:
+    from setuptools import setup
+    from setuptools import Extension
+except ImportError:
+    from distutils.core import setup
+    from distutils.extension import Extension
 
 if __name__ == "__main__":
     paths = []
@@ -25,12 +29,12 @@ if __name__ == "__main__":
         setup(
             name="hashtable",
             version="1.0",
-            description="THe hash table, writen in C.",
+            description="The hash table, writen in C.",
             url="https://github.com/Chukak/hash-table",
             ext_modules=[
                 Extension(
                     "hashtable",
-                    ["python.c", "../hashtable.c"],
+                    ["python.c", "../src/hashtable.c"],
                     include_dirs=paths,
                     extra_compile_args=[
                         "-g", "-std=c11", "-Werror", "-Wall", "-D_DEFAULT_SOURCE"
