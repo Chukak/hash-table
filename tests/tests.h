@@ -6,6 +6,6 @@
 
 #include <stdint.h>
 
-int run_tests();
+void run_tests();
 
 #endif
