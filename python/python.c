@@ -90,8 +90,7 @@ PyHashTable_init(PyHashTable *hash_table, PyObject *args)
 {
     uint32_t size = 0;
     if (!PyTuple_Size(args)) {
-        PyErr_SetString(PyExc_TypeError, 
-                "__init__ missing 1 positional argument `size`.");
+        PyErr_SetString(PyExc_TypeError, "__init__ missing 1 positional argument `size`.");
         PyErr_Print();
         return -1;
     }
@@ -181,10 +180,10 @@ PyHashTable_insert(PyObject *self, PyObject *args)
     if (value == NULL) {
         return NULL;
     }
-    uint32_t pos = tb_insert_item(h_table->table, key, &value);
+    tb_insert_item(h_table->table, key, &value);
     h_table->count = h_table->table->count;
     h_table->empty = h_table->table->empty;
-    return Py_BuildValue("I", pos);
+    Py_RETURN_NONE;
 }
 
 /*
@@ -238,38 +237,6 @@ PyHashTable_find(PyObject *self, PyObject *args)
     }
     PyObject *value = get_pointer(PyObject *, p);
     return Py_BuildValue("(s, O)", key, value);
-}
-
-/*
-    A static function, gets an element.
-    Returns a tuple in the format `(key, value)`.
- */
-static PyObject *
-PyHashTable_at(PyObject *self, PyObject *args)
-{
-    int pos;
-    if (!PyArg_Parse(args, "i", &pos)) {
-        PyErr_SetString(PyExc_TypeError, "The position must be an integer.");
-        return NULL;
-    } 
-    PyHashTable *h_table = (PyHashTable *)self;
-    if (!h_table) {
-        PyErr_SetString(PyExc_RuntimeError, "The pointer on the hashtable is NULL.");
-        return NULL;
-    }
-    tb_hash_table_item *item = tb_item_at(h_table->table, pos);
-    if (item == NULL) {
-        return Py_BuildValue("(s, O)", "", Py_None);
-    }
-    if (item->val == NULL && item->key == NULL) {
-        return Py_BuildValue("(O, O)", Py_None, Py_None);
-    }
-    void *p = item->val;
-    if (p == NULL) {
-        return Py_BuildValue("(s, O)", item->key, Py_None);
-    }
-    PyObject *value = get_pointer(PyObject *, p);
-    return Py_BuildValue("(s, O)", item->key, value);
 }
 
 /*
@@ -447,7 +414,7 @@ static PyMethodDef PyHashTable_methods[] = {
         "insert",
         (PyCFunction)PyHashTable_insert,
         METH_VARARGS,
-        "Inserts a value by key into the table. Returns the position."
+        "Inserts a value by key into the table."
     },
     {
         "delete",
@@ -462,12 +429,6 @@ static PyMethodDef PyHashTable_methods[] = {
         METH_O,
         "Search the item in the table. "
         "Returns a tuple in the format `(key, value)`.",
-    },
-    {
-        "at",
-        (PyCFunction)PyHashTable_at,
-        METH_O,
-        "Returns the element in this position.",
     },
     {
         "items",
